@@ -1,11 +1,13 @@
 package com.projects.socialapp.service;
 
 import com.projects.socialapp.Repo.UserRepo;
+import com.projects.socialapp.config.JwtProvider;
 import com.projects.socialapp.expection.EmailAlreadyExistsException;
 import com.projects.socialapp.expection.UserNotFoundException;
 import com.projects.socialapp.mapper.UserMapper;
 import com.projects.socialapp.model.User;
 import com.projects.socialapp.requestDto.UserRequestDto;
+import com.projects.socialapp.responseDto.UserProfileDto;
 import com.projects.socialapp.responseDto.UserResponseDto;
 import com.projects.socialapp.traits.ApiTrait;
 import lombok.AllArgsConstructor;
@@ -13,15 +15,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
+
+    private final JwtProvider jwtProvider;
+
     /*
     |--------------------------------------------------------------------------
     | Inject Of  Class
@@ -45,6 +47,25 @@ public class UserServiceImpl implements UserService {
         | Start Implements All Method
     |-------------------------------------------------------------------------- */
 
+    @Override
+    public Integer findUserIdByJwt(String jwt)
+    {
+        String email = jwtProvider.getEmailFromToken(jwt);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            return null;
+        }
+
+        return user.getId();
+    }
+    /*|--------------------------------------------------------------------------
+                                    | End Implement
+    |-------------------------------------------------------------------------- */
+
+
+
+
     /*
     |--------------------------------------------------------------------------
     | Create New User
@@ -59,14 +80,15 @@ public class UserServiceImpl implements UserService {
         if (userRepo.existsByEmail(dto.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
-        var studentModel = userMapper.toUser(dto);
-        var savedStudentModel = userRepo.save(studentModel);
-        return userMapper.toUserResponseDto(savedStudentModel);
+        var user = userMapper.toUser(dto);
+        var savedUser = userRepo.save(user);
+        return userMapper.toUserResponseDto(savedUser);
     }
 
     /*|--------------------------------------------------------------------------
-        | End Implement
+                                    | End Implement
     |-------------------------------------------------------------------------- */
+
 
 
 
@@ -79,19 +101,24 @@ public class UserServiceImpl implements UserService {
     |
     */
     @Override
-    public ResponseEntity<?> getUserByIdResponse(Long id) {
+    public ResponseEntity<?> getUserByIdResponse(Integer id) {
         List<UserResponseDto> user = Collections.singletonList(findUserById(id));
         return apiTrait.data(user,"The Data For User Retrieved Success", HttpStatus.OK);
 
     }
 
-    private UserResponseDto findUserById(Long id) {
+    private UserResponseDto findUserById(Integer id) {
         Optional<User> userOptional = userRepo.findById(id);
         if (userOptional.isEmpty()) {
             throw new UserNotFoundException("User not found with id: " + id);
         }
         return userOptional.map(userMapper::toUserResponseDto).orElse(null);
     }
+
+    /*|--------------------------------------------------------------------------
+                                    | End Implement
+    |-------------------------------------------------------------------------- */
+
 
 
 
@@ -118,32 +145,10 @@ public class UserServiceImpl implements UserService {
     }
 
     /*|--------------------------------------------------------------------------
-            | End Implement
+                                | End Implement
     |-------------------------------------------------------------------------- */
 
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Implement Followers
-    |--------------------------------------------------------------------------
-    |
-    | Here is How you can get all Users Using List And Hash Map
-    |
-    */
-    @Override
-    public ResponseEntity<?> followUser(Long userId1, Long userId2) {
-        User user1 = userRepo.findUserById(userId1);
-        User user2 = userRepo.findUserById(userId2);
-        user2.getFollowers().add(Math.toIntExact(user1.getId()));
-        user1.getFollowings().add(Math.toIntExact(user2.getId()));
-        userRepo.save(user1);
-        userRepo.save(user2);
-        return apiTrait.successMessage("followers add success",HttpStatus.ACCEPTED);
-    }
-    /*|--------------------------------------------------------------------------
-            | End Implement
-    |-------------------------------------------------------------------------- */
 
 
 
@@ -159,9 +164,11 @@ public class UserServiceImpl implements UserService {
     public List<User> searchUser(String query) {
         return null;
     }
+
     /*|--------------------------------------------------------------------------
             | End Implement
     |-------------------------------------------------------------------------- */
+
 
 
 
@@ -191,8 +198,9 @@ public class UserServiceImpl implements UserService {
     }
 
     /*|--------------------------------------------------------------------------
-            | End Implement
+                                       | End Implement
     |-------------------------------------------------------------------------- */
+
 
 
 
@@ -205,7 +213,7 @@ public class UserServiceImpl implements UserService {
     |
     */
     @Override
-    public ResponseEntity<?> updateUser(Long id, UserRequestDto dto) {
+    public ResponseEntity<?> updateUser(Integer id, UserRequestDto dto) {
         try {
             // Retrieve the user by id
             User user = userRepo.findById(id)
@@ -244,8 +252,129 @@ public class UserServiceImpl implements UserService {
             return apiTrait.errorMessage(null, "An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     /*|--------------------------------------------------------------------------
-            | End Implement
+                                    | End Implement
+    |-------------------------------------------------------------------------- */
+
+
+
+
+   /*
+   |--------------------------------------------------------------------------
+   | Implement Followers
+   |--------------------------------------------------------------------------
+   |
+   | Make Follow from user login to another user you need
+   |
+   */
+    @Override
+    public ResponseEntity<?> followUser(Integer userId1, Integer userId2) {
+        User user1 = userRepo.findUserById(userId1);
+        User user2 = userRepo.findUserById(userId2);
+
+        if (Objects.equals(userId1, userId2))
+        {
+            return apiTrait.errorMessage(null,"Cant Follow Your Self", HttpStatus.BAD_REQUEST);
+        }
+        else if (user1 != null && user2 != null) {
+            user2.getFollowers().add(user1);
+            user1.getFollowings().add(user2);
+
+            userRepo.save(user1);
+            userRepo.save(user2);
+
+            return apiTrait.successMessage("Followers added successfully", HttpStatus.ACCEPTED);
+        } else {
+            return apiTrait.errorMessage(null,"User(s) not found", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /*|--------------------------------------------------------------------------
+                                    | End Implement
+    |-------------------------------------------------------------------------- */
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Implement Profile
+    |--------------------------------------------------------------------------
+    |
+    | Get Number of Followers And Following and Get Friends
+    |
+    */
+    @Override
+    public UserProfileDto getUserProfile(Integer userId) {
+        Optional<User> userOptional = userRepo.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // Calculate the counts of followers and following
+            int followersCount = user.getFollowers().size();
+            int followingCount = user.getFollowings().size();
+
+            // Calculate the count of friends (mutual follows)
+            int friendsCount = 0;
+            for (User follower : user.getFollowers()) {
+                if (user.getFollowings().contains(follower)) {
+                    friendsCount++;
+                }
+            }
+
+            // Construct and return UserProfileDto
+            return UserProfileDto.fromUserResponseDto(
+                    new UserResponseDto(user.getId(), user.getFirstname(), user.getLastname(), user.getEmail(), user.getGender()),
+                    followersCount,
+                    followingCount,
+                    friendsCount);
+        } else {
+            throw new UserNotFoundException("User not found");
+        }
+    }
+
+    /*|--------------------------------------------------------------------------
+                                        | End Implement
+    |-------------------------------------------------------------------------- */
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Implement Profile
+    |--------------------------------------------------------------------------
+    |
+    | Get Number of Followers And Following and Get Friends
+    |
+    */
+    @Override
+    public ResponseEntity<?> unfollowUser(Integer userId1, Integer userId2) {
+        User user1 = userRepo.findUserById(userId1);
+        User user2 = userRepo.findUserById(userId2);
+
+        if (Objects.equals(userId1, userId2)) {
+            return apiTrait.errorMessage(null, "Cannot unfollow yourself", HttpStatus.BAD_REQUEST);
+        } else if (user1 != null && user2 != null) {
+            // Remove user2 from user1's followings and user1 from user2's followers
+            user2.getFollowers().remove(user1);
+            user1.getFollowings().remove(user2);
+
+            userRepo.save(user1);
+            userRepo.save(user2);
+
+            // Retrieve the updated user profile for user1
+            UserProfileDto userProfile = getUserProfile(userId1);
+
+            return ResponseEntity.ok().body(userProfile);
+        } else {
+            return apiTrait.errorMessage(null, "User(s) not found", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /*|--------------------------------------------------------------------------
+                                        | End Implement
     |-------------------------------------------------------------------------- */
 
 

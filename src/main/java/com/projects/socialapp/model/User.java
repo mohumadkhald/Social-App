@@ -1,12 +1,9 @@
 package com.projects.socialapp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -17,16 +14,32 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private String firstname;
     private String lastname;
     private String gender;
     private String email;
     private String password;
-    private List<Integer> followers;
-    private List<Integer>followings;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_followers",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "follower_id"))
+    private Set<User> followers;
+
+    @ManyToMany(mappedBy = "followers", fetch = FetchType.EAGER)
+    private Set<User> followings;
+
+    @Transient
+    private boolean friends;
+    @PostLoad
+    private void calculateFriends() {
+        friends = followers.stream().anyMatch(follower -> followings.contains(follower));
+    }
 
     public User(Long id, String firstname, String lastname, String email, String password) {
     }
+
+    
 }

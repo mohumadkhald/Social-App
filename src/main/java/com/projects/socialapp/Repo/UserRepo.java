@@ -4,12 +4,10 @@ import com.projects.socialapp.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
-public interface UserRepo extends JpaRepository<User, Long> {
+public interface UserRepo extends JpaRepository<User, Integer> {
     User findByEmail(String email);
     boolean existsByEmail(String email);
 
-    User findUserById(Long userId1);
+    User findUserById(Integer userId1);
 }
