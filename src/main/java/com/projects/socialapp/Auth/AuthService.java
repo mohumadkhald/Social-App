@@ -1,16 +1,13 @@
 package com.projects.socialapp.Auth;
 
-import com.projects.socialapp.model.User;
 import com.projects.socialapp.requestDto.LoginRequestDto;
-import com.projects.socialapp.requestDto.UserRequestDto;
-import org.springframework.http.ResponseEntity;
+import com.projects.socialapp.requestDto.RegisterRequestDto;
 
 public interface AuthService {
-    public User findUserProfileByJwt(String jwt);
 
-    Integer findUserIdByJwt(String jwt);
+    // Method Register User to Website
+    AuthResponse register(RegisterRequestDto request);
 
-    ResponseEntity<?> createUserHandeler(UserRequestDto user);
-
-    ResponseEntity<?> login(LoginRequestDto loginRequest);
+    //Method Log in For Website
+    AuthResponse login(LoginRequestDto request);
 }

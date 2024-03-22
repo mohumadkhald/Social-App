@@ -2,14 +2,12 @@ package com.projects.socialapp.controller;
 
 import com.projects.socialapp.Repo.UserRepo;
 import com.projects.socialapp.model.User;
-import com.projects.socialapp.requestDto.UserRequestDto;
+import com.projects.socialapp.requestDto.RegisterRequestDto;
 import com.projects.socialapp.responseDto.UserProfileDto;
 import com.projects.socialapp.responseDto.UserResponseDto;
 import com.projects.socialapp.service.UserService;
-import com.projects.socialapp.traits.ApiTrait;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +21,6 @@ public class UserController {
 
     private final UserRepo userRepo;
     private final UserService userService;
-    private final ApiTrait apiTrait;
 
 
 
@@ -39,7 +36,7 @@ public class UserController {
     |
     */
     @PostMapping
-    public UserResponseDto register(@Valid @RequestBody UserRequestDto dto)
+    public UserResponseDto register(@Valid @RequestBody RegisterRequestDto dto)
     {
         return  this.userService.registerUser(dto);
     }
@@ -53,7 +50,7 @@ public class UserController {
     |--------------------------------------------------------------------------
     */
     @GetMapping("/{id}")
-    public ResponseEntity<?> findUserById(@PathVariable Integer id) throws Exception
+    public ResponseEntity<?> findUserById(@PathVariable Integer id)
     {
         return userService.getUserByIdResponse(id);
     }
@@ -65,7 +62,7 @@ public class UserController {
     |--------------------------------------------------------------------------
     */
     @GetMapping("/search/{email}")
-    public ResponseEntity<?> findUserByEmail(@PathVariable String email) throws Exception
+    public ResponseEntity<?> findUserByEmail(@PathVariable String email)
     {
         return userService.getUserByEmailResponse(email);
     }
@@ -78,7 +75,7 @@ public class UserController {
     |--------------------------------------------------------------------------
     */
     @PutMapping("/{id}")
-    public ResponseEntity<?> editUser(@PathVariable Integer id, @RequestBody UserRequestDto newData)
+    public ResponseEntity<?> editUser(@PathVariable Integer id, @RequestBody RegisterRequestDto newData)
     {
 
         return userService.updateUser(id, newData);
@@ -131,7 +128,8 @@ public class UserController {
 
 
     @PutMapping("/unfollow/{userId2}")
-    public ResponseEntity<?> unfollowUserHandler(@PathVariable Integer userId2, @RequestHeader("Authorization") String jwtToken) throws ChangeSetPersister.NotFoundException {
+    public ResponseEntity<?> unfollowUserHandler(@PathVariable Integer userId2, @RequestHeader("Authorization") String jwtToken)
+    {
         Integer userId1 = userService.findUserIdByJwt(jwtToken);
         return userService.unfollowUser(userId1, userId2);
     }

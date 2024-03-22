@@ -25,17 +25,17 @@ public class UserException {
 
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<Object> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex, WebRequest request) {
+    public ResponseEntity<?> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex, WebRequest request) {
         HashMap<String, String> error = new HashMap<>();
         error.put("email", "Email Already Exists"); // Assuming "email" is the field causing the error
-        return (ResponseEntity<Object>) apiTrait.errorMessage(error, ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return apiTrait.errorMessage(error, ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
+    public ResponseEntity<?> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
         HashMap<String, String> error = new HashMap<>();
         error.put("user", "User Not Found"); // Assuming "user" is the field causing the error
-        return (ResponseEntity<Object>) apiTrait.errorMessage(error, ex.getMessage(), HttpStatus.NOT_FOUND);
+        return  apiTrait.errorMessage(error, ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

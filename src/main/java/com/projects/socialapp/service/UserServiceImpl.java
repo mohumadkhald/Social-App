@@ -1,12 +1,12 @@
 package com.projects.socialapp.service;
 
 import com.projects.socialapp.Repo.UserRepo;
-import com.projects.socialapp.config.JwtProvider;
+import com.projects.socialapp.config.JwtService;
 import com.projects.socialapp.expection.EmailAlreadyExistsException;
 import com.projects.socialapp.expection.UserNotFoundException;
 import com.projects.socialapp.mapper.UserMapper;
 import com.projects.socialapp.model.User;
-import com.projects.socialapp.requestDto.UserRequestDto;
+import com.projects.socialapp.requestDto.RegisterRequestDto;
 import com.projects.socialapp.responseDto.UserProfileDto;
 import com.projects.socialapp.responseDto.UserResponseDto;
 import com.projects.socialapp.traits.ApiTrait;
@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final JwtProvider jwtProvider;
 
     /*
     |--------------------------------------------------------------------------
@@ -35,6 +34,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final UserMapper userMapper;
     private final ApiTrait apiTrait;
+    private final JwtService jwtProvider;
 
     /*|--------------------------------------------------------------------------
             | End of Inject
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
     |
     */
     @Override
-    public UserResponseDto registerUser(UserRequestDto dto) {
+    public UserResponseDto registerUser(RegisterRequestDto dto) {
         // Check if the email already exists
         if (userRepo.existsByEmail(dto.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");
@@ -213,7 +213,7 @@ public class UserServiceImpl implements UserService {
     |
     */
     @Override
-    public ResponseEntity<?> updateUser(Integer id, UserRequestDto dto) {
+    public ResponseEntity<?> updateUser(Integer id, RegisterRequestDto dto) {
         try {
             // Retrieve the user by id
             User user = userRepo.findById(id)
