@@ -1,5 +1,6 @@
 package com.projects.socialapp.traits;
 
+import com.projects.socialapp.responseDto.UserProfileDto;
 import com.projects.socialapp.responseDto.UserResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,22 +11,37 @@ import java.util.List;
 
 @Service
 public class ApiTrait {
+    public static ResponseEntity<?> handleList(List<UserProfileDto> users, String messageNotFound, HttpStatus httpStatus) {
+        if (users.isEmpty()) {
+            return errorMessage(new HashMap<>(), messageNotFound, HttpStatus.NOT_FOUND);
+        } else {
+            return ResponseEntity.status(httpStatus)
+                    .body(new ApiResponse(messageNotFound, new HashMap<>(), users));
+        }
+    }
+
     public ResponseEntity<?> successMessage(String message, HttpStatus code) {
         return ResponseEntity.status(code)
-                .body(new ApiResponse(message, null, null));
+                .body(new ApiResponse(message, new HashMap<>(), new HashMap<>()));
     }
 
-    public ResponseEntity<?> errorMessage(HashMap<String, String> errors, String message, HttpStatus code) {
+    public static ResponseEntity<?> errorMessage(HashMap<String, String> errors, String message, HttpStatus code) {
         return ResponseEntity.status(code)
-                .body(new ApiResponse(message, errors, null));
+                .body(new ApiResponse(message, errors, new HashMap<>()));
     }
 
-    public ResponseEntity<?> data(List<UserResponseDto> data, String message, HttpStatus code) {
+    public static ResponseEntity<?> data(List<UserResponseDto> data, String message, HttpStatus code) {
         return ResponseEntity.status(code)
-                .body(new ApiResponse(message, null, data));
+                .body(new ApiResponse(message, new HashMap<>(), data));
     }
 
-
+    public static ResponseEntity<?> handleUserList(List<UserResponseDto> users, String messageNotFound) {
+        if (users.isEmpty()) {
+            return errorMessage(new HashMap<>(), messageNotFound, HttpStatus.NOT_FOUND);
+        } else {
+            return data(users, "The Data Retrieved Success", HttpStatus.OK);
+        }
+    }
 
     // Inner class representing the API response structure
     static class ApiResponse {

@@ -1,12 +1,8 @@
 package com.projects.socialapp.service;
 
-import com.projects.socialapp.model.User;
 import com.projects.socialapp.requestDto.RegisterRequestDto;
-import com.projects.socialapp.responseDto.UserProfileDto;
 import com.projects.socialapp.responseDto.UserResponseDto;
 import org.springframework.http.ResponseEntity;
-
-import java.util.List;
 
 public interface UserService {
 
@@ -25,7 +21,7 @@ public interface UserService {
     ResponseEntity<?> followUser(Integer userId1, Integer userId2);
 
     // Method search user
-    List<User> searchUser(String query);
+    ResponseEntity<?> searchUser(String query);
 
 
 
@@ -34,7 +30,14 @@ public interface UserService {
 
     ResponseEntity<?> updateUser(Integer id, RegisterRequestDto dto);
 
-    UserProfileDto getUserProfile(Integer userId);
+    ResponseEntity<?> getUserProfile(Integer userId);
 
     ResponseEntity<?> unfollowUser(Integer userId1, Integer userId2);
+
+
+    ResponseEntity<?> getUserFollowers(Integer userId);
+
+    ResponseEntity<?> getUserFollowing(Integer userId);
+
+    ResponseEntity<?> getUserFriends(Integer userId);
 }

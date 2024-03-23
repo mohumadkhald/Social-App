@@ -9,5 +9,5 @@ public interface AuthService {
     AuthResponse register(RegisterRequestDto request);
 
     //Method Log in For Website
-    AuthResponse login(LoginRequestDto request);
+    AuthResponse login(LoginRequestDto request) throws Exception;
 }

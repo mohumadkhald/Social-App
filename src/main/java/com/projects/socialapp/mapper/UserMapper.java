@@ -28,6 +28,10 @@ public class UserMapper {
         user.setGender(dto.getGender());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.USER);
+        user.setAccountNonExpired(true);
+        user.setAccountNonLocked(true);
+        user.setCredentialsNonExpired(true);
+        user.setPhone(dto.getPhone());
         return user;
     }
 

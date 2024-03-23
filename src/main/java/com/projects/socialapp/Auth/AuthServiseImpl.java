@@ -1,9 +1,9 @@
 package com.projects.socialapp.Auth;
 
+import com.projects.socialapp.Config.JwtService;
 import com.projects.socialapp.Repo.UserRepo;
-import com.projects.socialapp.config.JwtService;
+import com.projects.socialapp.expection.AuthenticationnException;
 import com.projects.socialapp.expection.EmailAlreadyExistsException;
-import com.projects.socialapp.expection.UserNotFoundException;
 import com.projects.socialapp.model.Role;
 import com.projects.socialapp.model.User;
 import com.projects.socialapp.requestDto.LoginRequestDto;
@@ -14,6 +14,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @AllArgsConstructor
 @Service
@@ -37,7 +39,7 @@ public class AuthServiseImpl implements AuthService {
     | Implement Register
     |--------------------------------------------------------------------------
     |
-    | In her you can controller the data you want to enter to db
+    | In her you can Controller the data you want to enter to db
     |
     */
     @Override
@@ -49,6 +51,10 @@ public class AuthServiseImpl implements AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .gender(request.getGender())
+                .phone(request.getPhone())
+                .accountNonExpired(true) // Set accountNonExpired property
+                .accountNonLocked(true) // Set accountNonLocked property
+                .credentialsNonExpired(true) // Set credentialsNonExpired property
                 .build();
         if (userRepo.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");
@@ -66,8 +72,7 @@ public class AuthServiseImpl implements AuthService {
     | Take Data you need from auth and have all information to check any think you need
     |
     */
-    @Override
-    public AuthResponse login(LoginRequestDto request) {
+    public AuthResponse login(LoginRequestDto request) throws Exception {
         try {
             // Authenticate user
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
@@ -75,13 +80,36 @@ public class AuthServiseImpl implements AuthService {
             // Retrieve user details
             var user = userRepo.findByEmail(request.getEmail());
 
+
             // Generate JWT token
             var jwtToken = jwtService.generateToken(user);
 
-            // Return the token along with the email
+            // Return the token along with the user details
             return AuthResponse.builder().token(jwtToken).message("Login Success").build();
         } catch (AuthenticationException e) {
-            throw new UserNotFoundException("This Email Not Found Register First");
+
+            String errorMessage = getString(e);
+            throw new AuthenticationnException(errorMessage) {
+
+            };
         }
     }
+
+    private static String getString(AuthenticationException e) {
+        String errorMessage = e.getMessage();
+        if (Objects.equals(errorMessage, "UserDetailsService returned null, which is an interface contract violation")) {
+            errorMessage = "You Are Not Register Yet";
+        } else if (Objects.equals(errorMessage, "User credentials have expired")) {
+            errorMessage = "User credentials have expired Please Reset Your Password";
+        } else if (Objects.equals(errorMessage, "User account has expired")) {
+            errorMessage = "User account has expired Please Contact Support Service";
+        } else if (Objects.equals(errorMessage, "User account is locked")) {
+            errorMessage = "User account is locked Please Contact Support Service";
+        } else if (Objects.equals(errorMessage, "Bad credentials")) {
+            errorMessage = "Invalid Credentials";
+        }
+        return errorMessage;
+    }
+
+
 }

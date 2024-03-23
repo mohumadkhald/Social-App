@@ -1,5 +1,6 @@
 package com.projects.socialapp.requestDto;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -26,6 +27,7 @@ public class RegisterRequestDto {
         @Pattern(regexp = "^01[0-2,5,9]{1}[0-9]{8}$", message = "Phone number must be 11 digits and start with 01 followed by 0, 1, 2, 5, or 9")
         private String phone;
 
+        @Column(unique = true)
         @NotBlank(message = "Email cannot be empty or start space")
         @Pattern(regexp = "^(.+)@(.+)$", message = "Email should be valid")
         String email;

@@ -1,4 +1,4 @@
-package com.projects.socialapp.config;
+package com.projects.socialapp.Config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

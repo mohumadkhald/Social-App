@@ -1,4 +1,4 @@
-package com.projects.socialapp.config;
+package com.projects.socialapp.Config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

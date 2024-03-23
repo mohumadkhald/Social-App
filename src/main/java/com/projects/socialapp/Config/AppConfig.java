@@ -1,4 +1,4 @@
-package com.projects.socialapp.config;
+package com.projects.socialapp.Config;
 
 import com.projects.socialapp.Repo.UserRepo;
 import lombok.RequiredArgsConstructor;

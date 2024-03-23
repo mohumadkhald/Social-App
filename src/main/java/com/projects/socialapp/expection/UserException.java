@@ -28,7 +28,7 @@ public class UserException {
     public ResponseEntity<?> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex, WebRequest request) {
         HashMap<String, String> error = new HashMap<>();
         error.put("email", "Email Already Exists"); // Assuming "email" is the field causing the error
-        return apiTrait.errorMessage(error, ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return  apiTrait.errorMessage(error, ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
@@ -49,6 +49,13 @@ public class UserException {
                 }
         );
         return apiTrait.errorMessage(errors, "Validation Failed", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuthenticationnException.class)
+    public ResponseEntity<?> handleAuthException(AuthenticationnException ex, WebRequest request) {
+        HashMap<String, String> error = new HashMap<>();
+        error.put("Problem", ex.getMessage());
+        return  apiTrait.errorMessage(error, "Authentication Failed", HttpStatus.BAD_REQUEST);
     }
 
 }

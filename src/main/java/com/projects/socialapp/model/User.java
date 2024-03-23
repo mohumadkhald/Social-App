@@ -26,6 +26,12 @@ public class User implements UserDetails {
     private String phone;
     private String email;
     private String password;
+    @Setter
+    private boolean accountNonExpired;
+    @Setter
+    private boolean accountNonLocked;
+    @Setter
+    private boolean credentialsNonExpired;
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -49,7 +55,6 @@ public class User implements UserDetails {
     public User(Long id, String firstname, String lastname, String email, String password) {
     }
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
@@ -65,17 +70,17 @@ public class User implements UserDetails {
     }
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return accountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return accountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return credentialsNonExpired;
     }
 
     @Override

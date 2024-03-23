@@ -3,12 +3,11 @@ package com.projects.socialapp.controller;
 import com.projects.socialapp.Repo.UserRepo;
 import com.projects.socialapp.model.User;
 import com.projects.socialapp.requestDto.RegisterRequestDto;
-import com.projects.socialapp.responseDto.UserProfileDto;
 import com.projects.socialapp.responseDto.UserResponseDto;
 import com.projects.socialapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -87,7 +86,7 @@ public class UserController {
 
     /*
     |--------------------------------------------------------------------------
-    | API Routes Delete User
+    | API Routes Delete User Not implement and need to remove any following first
     |--------------------------------------------------------------------------
     */
     @DeleteMapping("/{id}")
@@ -136,14 +135,36 @@ public class UserController {
 
 
 
-
     @GetMapping("/{userId}/profile")
     public ResponseEntity<?> getUserProfile(@PathVariable Integer userId) {
-        try {
-            UserProfileDto userProfileDto = userService.getUserProfile(userId);
-            return ResponseEntity.ok(userProfileDto);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
-        }
+            return userService.getUserProfile(userId);
+//            ResponseEntity<?> userProfileDto = userService.getUserProfile(userId);
+//            return ResponseEntity.ok(userProfileDto);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
+//        }
+    }
+
+
+    @GetMapping("search")
+    public ResponseEntity<?> search(@RequestParam("query") String query)
+    {
+        return (ResponseEntity<?>) userService.searchUser(query);
+    }
+
+
+    @GetMapping("/{userId}/followers")
+    public <UserResponseDto> HttpEntity<?> getUserFollowers(@PathVariable Integer userId) {
+        return userService.getUserFollowers(userId);
+    }
+
+    @GetMapping("/{userId}/following")
+    public <UserResponseDto> HttpEntity<?> getUserFollowing(@PathVariable Integer userId) {
+        return userService.getUserFollowing(userId);
+    }
+
+    @GetMapping("/{userId}/friends")
+    public <UserResponseDto> HttpEntity<?> getUserFriends(@PathVariable Integer userId) {
+        return userService.getUserFriends(userId);
     }
 }
