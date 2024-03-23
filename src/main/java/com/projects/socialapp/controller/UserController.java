@@ -138,6 +138,7 @@ public class UserController {
     @GetMapping("/{userId}/profile")
     public ResponseEntity<?> getUserProfile(@PathVariable Integer userId) {
             return userService.getUserProfile(userId);
+            //response with header
 //            ResponseEntity<?> userProfileDto = userService.getUserProfile(userId);
 //            return ResponseEntity.ok(userProfileDto);
 //        } catch (Exception e) {
@@ -167,4 +168,29 @@ public class UserController {
     public <UserResponseDto> HttpEntity<?> getUserFriends(@PathVariable Integer userId) {
         return userService.getUserFriends(userId);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    @PutMapping("/toggle-follow/{userId2}")
+    public ResponseEntity<?> toggleFollow(@PathVariable Integer userId2, @RequestHeader("Authorization") String jwtToken)
+    {
+        Integer userId1 = userService.findUserIdByJwt(jwtToken);
+        return userService.toggleFollowUser(userId1, userId2);
+    }
+
+
+
+
+
+
+
 }

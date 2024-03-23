@@ -296,7 +296,7 @@ public class UserServiceImpl implements UserService {
             userRepo.save(user1);
             userRepo.save(user2);
 
-            return apiTrait.successMessage("Followers added successfully", HttpStatus.ACCEPTED);
+            return ApiTrait.successMessage("Followers added successfully", HttpStatus.ACCEPTED);
         } else {
             return ApiTrait.errorMessage(null,"User(s) not found", HttpStatus.NOT_FOUND);
         }
@@ -478,6 +478,62 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("User not found");
         }
     }
+
+
+
+
+
+
+
+
+    @Override
+    public ResponseEntity<?> toggleFollowUser(Integer userId1, Integer userId2) {
+        User user1 = userRepo.findUserById(userId1);
+        User user2 = userRepo.findUserById(userId2);
+
+        if (Objects.equals(userId1, userId2)) {
+            return ApiTrait.errorMessage(null, "Cannot follow/unfollow yourself", HttpStatus.BAD_REQUEST);
+        } else if (user1 != null && user2 != null) {
+            // If user1 is following user2, unfollow; else follow
+            if (user1.getFollowings().contains(user2)) {
+                // User1 is following user2, so unfollow
+                user1.getFollowings().remove(user2);
+                user2.getFollowers().remove(user1);
+                // Save changes
+                userRepo.save(user1);
+                userRepo.save(user2);
+            } else {
+                // User1 is not following user2, so follow
+                user1.getFollowings().add(user2);
+                user2.getFollowers().add(user1);
+                // Save changes
+                userRepo.save(user1);
+                userRepo.save(user2);
+            }
+
+
+
+            // Return success message
+            String action = user1.getFollowings().contains(user2) ? "followed" : "unfollowed";
+            return ApiTrait.successMessage("User " + action + " successfully", HttpStatus.ACCEPTED);
+        } else {
+            return ApiTrait.errorMessage(null, "User(s) not found", HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 

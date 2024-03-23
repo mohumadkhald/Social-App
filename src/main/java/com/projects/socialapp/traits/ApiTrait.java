@@ -20,7 +20,7 @@ public class ApiTrait {
         }
     }
 
-    public ResponseEntity<?> successMessage(String message, HttpStatus code) {
+    public static ResponseEntity<?> successMessage(String message, HttpStatus code) {
         return ResponseEntity.status(code)
                 .body(new ApiResponse(message, new HashMap<>(), new HashMap<>()));
     }

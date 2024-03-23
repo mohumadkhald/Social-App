@@ -1,5 +1,6 @@
 package com.projects.socialapp.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,6 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +18,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "users")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +37,68 @@ public class User implements UserDetails {
     private boolean credentialsNonExpired;
     @Enumerated(EnumType.STRING)
     private Role role;
+
+
+
+    @OneToMany(
+            mappedBy = "user"
+    )
+    @JsonManagedReference
+    private List<Post> posts;
+
+
+
+
+    @ManyToMany(mappedBy = "likedByUsers", cascade = CascadeType.ALL)
+    private Set<Post> likedPosts = new HashSet<>();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

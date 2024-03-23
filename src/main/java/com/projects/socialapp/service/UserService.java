@@ -40,4 +40,6 @@ public interface UserService {
     ResponseEntity<?> getUserFollowing(Integer userId);
 
     ResponseEntity<?> getUserFriends(Integer userId);
+
+    ResponseEntity<?> toggleFollowUser(Integer userId1, Integer userId2);
 }
