@@ -17,23 +17,16 @@ public interface UserService {
     // Method Get User By Email
     ResponseEntity<?> getUserByEmailResponse(String email);
 
-
-    ResponseEntity<?> followUser(Integer userId1, Integer userId2);
-
     // Method search user
     ResponseEntity<?> searchUser(String query);
 
-
-
     ResponseEntity<?> getAllUsers();
-
 
     ResponseEntity<?> updateUser(Integer id, RegisterRequestDto dto);
 
     ResponseEntity<?> getUserProfile(Integer userId);
 
-    ResponseEntity<?> unfollowUser(Integer userId1, Integer userId2);
-
+    ResponseEntity<?> toggleFollowUser(Integer userId1, Integer userId2);
 
     ResponseEntity<?> getUserFollowers(Integer userId);
 
@@ -41,5 +34,4 @@ public interface UserService {
 
     ResponseEntity<?> getUserFriends(Integer userId);
 
-    ResponseEntity<?> toggleFollowUser(Integer userId1, Integer userId2);
 }

@@ -8,6 +8,9 @@ import com.projects.socialapp.model.Role;
 import com.projects.socialapp.model.User;
 import com.projects.socialapp.requestDto.LoginRequestDto;
 import com.projects.socialapp.requestDto.RegisterRequestDto;
+import com.projects.socialapp.token.Token;
+import com.projects.socialapp.token.TokenRepo;
+import com.projects.socialapp.token.TokenType;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -33,7 +36,7 @@ public class AuthServiseImpl implements AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-
+    private final TokenRepo tokenRepo;
     /*
     |--------------------------------------------------------------------------
     | Implement Register
@@ -52,6 +55,7 @@ public class AuthServiseImpl implements AuthService {
                 .role(Role.USER)
                 .gender(request.getGender())
                 .phone(request.getPhone())
+                .rememberMe(request.isRemember())
                 .accountNonExpired(true) // Set accountNonExpired property
                 .accountNonLocked(true) // Set accountNonLocked property
                 .credentialsNonExpired(true) // Set credentialsNonExpired property
@@ -59,10 +63,15 @@ public class AuthServiseImpl implements AuthService {
         if (userRepo.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
-        userRepo.save(user);
-        var jwtToken = jwtService.generateToken(user);
+        var savedUser = userRepo.save(user);
+        int expirationDay = getExpirationDay(savedUser);
+        var jwtToken = jwtService.generateToken(user, expirationDay);
+        savedUserToken(savedUser, jwtToken);
         return AuthResponse.builder().token(jwtToken).message("Register Success Have A Nice Time").build();
     }
+
+
+
 
     /*
     |--------------------------------------------------------------------------
@@ -80,9 +89,12 @@ public class AuthServiseImpl implements AuthService {
             // Retrieve user details
             var user = userRepo.findByEmail(request.getEmail());
 
+            int expirationDay = getExpirationDay(user);
 
             // Generate JWT token
-            var jwtToken = jwtService.generateToken(user);
+            var jwtToken = jwtService.generateToken(user, expirationDay);
+            savedUserToken(user, jwtToken);
+
 
             // Return the token along with the user details
             return AuthResponse.builder().token(jwtToken).message("Login Success").build();
@@ -95,6 +107,7 @@ public class AuthServiseImpl implements AuthService {
         }
     }
 
+    // error message when error in login
     private static String getString(AuthenticationException e) {
         String errorMessage = e.getMessage();
         if (Objects.equals(errorMessage, "UserDetailsService returned null, which is an interface contract violation")) {
@@ -110,6 +123,46 @@ public class AuthServiseImpl implements AuthService {
         }
         return errorMessage;
     }
+
+
+    // Saved any token when user register or login
+    private void savedUserToken(User user, String jwtToken) {
+        var myToken = Token.builder()
+                .user(user)
+                .token(jwtToken)
+                .tokenType(TokenType.BEARER)
+                .expired(false)
+                .revoked(false)
+                .build();
+        tokenRepo.save(myToken);
+    }
+
+    // set expiry date for token
+    private static int getExpirationDay(User user) {
+        int expirationDay;
+        if (user.isRememberMe())
+        {
+            expirationDay = 1000 * 60 * 60 * 24 * 7; // check Remember Me token Valid 7 Days
+        } else {
+            expirationDay = 1000 * 60 * 60 * 4; // If Not check RememberMe token valid 4 Hour or when logout
+        }
+        return expirationDay;
+    }
+
+
+    // if you need make only for user one token call this method on login
+    private void revokeAllUserToken(User user)
+    {
+        var validTokensForUser = tokenRepo.findAllValidTokenByUser(user.getId());
+        if (validTokensForUser.isEmpty())
+            return;
+        validTokensForUser.forEach(t -> {
+            t.setExpired(true);
+            t.setRevoked(true);
+        });
+        tokenRepo.saveAll(validTokensForUser);
+    }
+
 
 
 }

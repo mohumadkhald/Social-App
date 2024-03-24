@@ -83,7 +83,6 @@ public class UserController {
 
 
 
-
     /*
     |--------------------------------------------------------------------------
     | API Routes Delete User Not implement and need to remove any following first
@@ -101,6 +100,8 @@ public class UserController {
         return ResponseEntity.ok("user not found");
     }
 
+
+
     /*
     |--------------------------------------------------------------------------
     | API Routes Get AllUser
@@ -113,73 +114,12 @@ public class UserController {
     }
 
 
+
     /*
     |--------------------------------------------------------------------------
-    | API Routes Follow User
+    | API Routes Follow/UnFollow User
     |--------------------------------------------------------------------------
     */
-    @PutMapping("/follow/{userId2}")
-    public ResponseEntity<?> followUserHandler(@PathVariable Integer userId2, @RequestHeader("Authorization") String jwtToken)
-    {
-        Integer userId1 = userService.findUserIdByJwt(jwtToken);
-        return userService.followUser(userId1, userId2);
-    }
-
-
-    @PutMapping("/unfollow/{userId2}")
-    public ResponseEntity<?> unfollowUserHandler(@PathVariable Integer userId2, @RequestHeader("Authorization") String jwtToken)
-    {
-        Integer userId1 = userService.findUserIdByJwt(jwtToken);
-        return userService.unfollowUser(userId1, userId2);
-    }
-
-
-
-    @GetMapping("/{userId}/profile")
-    public ResponseEntity<?> getUserProfile(@PathVariable Integer userId) {
-            return userService.getUserProfile(userId);
-            //response with header
-//            ResponseEntity<?> userProfileDto = userService.getUserProfile(userId);
-//            return ResponseEntity.ok(userProfileDto);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e);
-//        }
-    }
-
-
-    @GetMapping("search")
-    public ResponseEntity<?> search(@RequestParam("query") String query)
-    {
-        return (ResponseEntity<?>) userService.searchUser(query);
-    }
-
-
-    @GetMapping("/{userId}/followers")
-    public <UserResponseDto> HttpEntity<?> getUserFollowers(@PathVariable Integer userId) {
-        return userService.getUserFollowers(userId);
-    }
-
-    @GetMapping("/{userId}/following")
-    public <UserResponseDto> HttpEntity<?> getUserFollowing(@PathVariable Integer userId) {
-        return userService.getUserFollowing(userId);
-    }
-
-    @GetMapping("/{userId}/friends")
-    public <UserResponseDto> HttpEntity<?> getUserFriends(@PathVariable Integer userId) {
-        return userService.getUserFriends(userId);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
     @PutMapping("/toggle-follow/{userId2}")
     public ResponseEntity<?> toggleFollow(@PathVariable Integer userId2, @RequestHeader("Authorization") String jwtToken)
     {
@@ -189,6 +129,65 @@ public class UserController {
 
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | API Routes Profile of User
+    |--------------------------------------------------------------------------
+    */
+
+    @GetMapping("/{userId}/profile")
+    public ResponseEntity<?> getUserProfile(@PathVariable Integer userId) {
+            return userService.getUserProfile(userId);
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Routes Search about User by firstname or email or phone
+    |--------------------------------------------------------------------------
+    */
+    @GetMapping("search")
+    public ResponseEntity<?> search(@RequestParam("query") String query)
+    {
+        return userService.searchUser(query);
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Routes Number of Followers
+    |--------------------------------------------------------------------------
+    */
+    @GetMapping("/{userId}/followers")
+    public <UserResponseDto> HttpEntity<?> getUserFollowers(@PathVariable Integer userId) {
+        return userService.getUserFollowers(userId);
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Routes Number of Following
+    |--------------------------------------------------------------------------
+    */
+    @GetMapping("/{userId}/following")
+    public <UserResponseDto> HttpEntity<?> getUserFollowing(@PathVariable Integer userId) {
+        return userService.getUserFollowing(userId);
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Routes Number of Friends
+    |--------------------------------------------------------------------------
+    */
+    @GetMapping("/{userId}/friends")
+    public <UserResponseDto> HttpEntity<?> getUserFriends(@PathVariable Integer userId) {
+        return userService.getUserFriends(userId);
+    }
 
 
 

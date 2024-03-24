@@ -1,6 +1,7 @@
 package com.projects.socialapp.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.projects.socialapp.token.Token;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +30,10 @@ public class User implements UserDetails {
     private String phone;
     private String email;
     private String password;
+    private boolean rememberMe;
+
+
+
     @Setter
     private boolean accountNonExpired;
     @Setter
@@ -38,6 +43,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
 
 
     @OneToMany(

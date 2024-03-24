@@ -11,12 +11,14 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 @Service
 @Component
 public class JwtService {
-    private static final String SECRET_KEY = "WmZq3t6weShVmYq3KaPdSgVkFJaNdRzCFJ6v9yBEp2s5v8yUkXn2r5ucRfUjXnZHMcQfTj";
+    private static final String SECRET_KEY = "WmZq3t6weShVmYq3KaPdSgVikmcleckFJefdcdsgvUkXn2r5ucRfUjXnZHMcQfTj";
     public String extractUsername(String token) {
         return extractClaims(token, Claims::getSubject);
     }
@@ -26,12 +28,14 @@ public class JwtService {
         return claimsTResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
+
+
+    public String generateToken(UserDetails userDetails,int expirationDay) {
         return Jwts
                 .builder()
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationDay))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -65,17 +69,52 @@ public class JwtService {
         return extractClaims(token, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+
+
+
+
+/* ---------------------------------------------------------------------
+|||    private Claims extractAllClaims(String token) {
+|||       return Jwts
+|||               .parserBuilder()
+|||               .setSigningKey(getSignInKey())
+|||               .build()
+|||               .parseClaimsJws(token)
+|||                .getBody();
+|||        }
+--------------------------------------------------------------------------*/
+
+
+
+    public Claims extractAllClaims(String token) {
+        try {
+            return Jwts
+                    .parserBuilder()
+                    .setSigningKey(getSignInKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            // Handle token parsing exceptions
+            // For example, log the error or throw a custom exception
+            throw new RuntimeException("Failed to parse JWT token: " + e.getMessage(), e);
+        }
     }
 
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private static final Set<String> revokedTokens = ConcurrentHashMap.newKeySet();
+
+    // Function to invalidate or destroy a token
+    public void invalidateToken(String token) {
+        revokedTokens.add(token);
+    }
+
+    // Function to check if a token is revoked
+    public static boolean isTokenRevoked(String token) {
+        return revokedTokens.contains(token);
     }
 }

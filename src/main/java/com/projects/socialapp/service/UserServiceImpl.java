@@ -140,7 +140,7 @@ public class UserServiceImpl implements UserService {
         if (user != null) {
             return userMapper.toUserResponseDto(user);
         }
-        throw new UserNotFoundException("The user not found" + email);
+        throw new UserNotFoundException("The user not found " + email);
     }
 
     /*|--------------------------------------------------------------------------
@@ -252,7 +252,7 @@ public class UserServiceImpl implements UserService {
 
 
             // Return success response
-            return apiTrait.successMessage("User updated successfully", HttpStatus.OK);
+            return ApiTrait.successMessage("User updated successfully", HttpStatus.OK);
         } catch (UserNotFoundException e) {
             // Return error response for user not found
             throw  new UserNotFoundException("The User Not Found" + id);
@@ -274,76 +274,49 @@ public class UserServiceImpl implements UserService {
 
    /*
    |--------------------------------------------------------------------------
-   | Implement Followers
+   | Implement Follow or UnFollow
    |--------------------------------------------------------------------------
    |
    | Make Follow from user login to another user you need
    |
    */
-    @Override
-    public ResponseEntity<?> followUser(Integer userId1, Integer userId2) {
-        User user1 = userRepo.findUserById(userId1);
-        User user2 = userRepo.findUserById(userId2);
+   @Override
+   public ResponseEntity<?> toggleFollowUser(Integer userId1, Integer userId2) {
+       User user1 = userRepo.findUserById(userId1);
+       User user2 = userRepo.findUserById(userId2);
 
-        if (Objects.equals(userId1, userId2))
-        {
-            return ApiTrait.errorMessage(null,"Cant Follow Your Self", HttpStatus.BAD_REQUEST);
-        }
-        else if (user1 != null && user2 != null) {
-            user2.getFollowers().add(user1);
-            user1.getFollowings().add(user2);
+       if (Objects.equals(userId1, userId2)) {
+           return ApiTrait.errorMessage(null, "Cannot follow/unfollow yourself", HttpStatus.BAD_REQUEST);
+       } else if (user1 != null && user2 != null) {
+           // If user1 is following user2, unfollow; else follow
+           if (user1.getFollowings().contains(user2)) {
+               // User1 is following user2, so unfollow
+               user1.getFollowings().remove(user2);
+               user2.getFollowers().remove(user1);
+               // Save changes
+               userRepo.save(user1);
+               userRepo.save(user2);
+           } else {
+               // User1 is not following user2, so follow
+               user1.getFollowings().add(user2);
+               user2.getFollowers().add(user1);
+               // Save changes
+               userRepo.save(user1);
+               userRepo.save(user2);
+           }
 
-            userRepo.save(user1);
-            userRepo.save(user2);
-
-            return ApiTrait.successMessage("Followers added successfully", HttpStatus.ACCEPTED);
-        } else {
-            return ApiTrait.errorMessage(null,"User(s) not found", HttpStatus.NOT_FOUND);
-        }
-    }
+           // Return success message
+           String action = user1.getFollowings().contains(user2) ? "followed" : "unfollowed";
+           return ApiTrait.successMessage("User " + action + " successfully", HttpStatus.ACCEPTED);
+       } else {
+           return ApiTrait.errorMessage(null, "User(s) not found", HttpStatus.NOT_FOUND);
+       }
+   }
 
     /*|--------------------------------------------------------------------------
                                     | End Implement
     |-------------------------------------------------------------------------- */
 
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Implement Unfollow
-    |--------------------------------------------------------------------------
-    |
-    | The Method used to unfollow User
-    |
-    */
-    @Override
-    public ResponseEntity<?> unfollowUser(Integer userId1, Integer userId2) {
-        User user1 = userRepo.findUserById(userId1);
-        User user2 = userRepo.findUserById(userId2);
-
-        if (Objects.equals(userId1, userId2)) {
-            return ApiTrait.errorMessage(null, "Cannot unfollow yourself", HttpStatus.BAD_REQUEST);
-        } else if (user1 != null && user2 != null) {
-            // Remove user2 from user1's followings and user1 from user2's followers
-            user2.getFollowers().remove(user1);
-            user1.getFollowings().remove(user2);
-
-            userRepo.save(user1);
-            userRepo.save(user2);
-
-            // Retrieve the updated user profile for user1
-            ResponseEntity<?> userProfile = getUserProfile(userId1);
-
-            return ResponseEntity.ok().body(userProfile);
-        } else {
-            return ApiTrait.errorMessage(null, "User(s) not found", HttpStatus.NOT_FOUND);
-        }
-    }
-
-    /*|--------------------------------------------------------------------------
-                                        | End Implement
-    |-------------------------------------------------------------------------- */
 
 
 
@@ -390,7 +363,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
     /*|--------------------------------------------------------------------------
                                         | End Implement
     |-------------------------------------------------------------------------- */
@@ -398,6 +370,14 @@ public class UserServiceImpl implements UserService {
 
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Implement Unfollow
+    |--------------------------------------------------------------------------
+    |
+    | The Method used to Get Number Of Followers For Everyone
+    |
+    */
     @Override
     public ResponseEntity<?> getUserFollowers(Integer userId) {
         Optional<User> userOptional = userRepo.findById(userId);
@@ -423,6 +403,21 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /*|--------------------------------------------------------------------------
+                                        | End Implement
+    |-------------------------------------------------------------------------- */
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Implement To Display Number Of Users You are Following
+    |--------------------------------------------------------------------------
+    |
+    | The Method used to unfollow User
+    |
+    */
     @Override
     public ResponseEntity<?> getUserFollowing(Integer userId) {
         Optional<User> userOptional = userRepo.findById(userId);
@@ -447,6 +442,22 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("User not found");
         }
     }
+
+    /*|--------------------------------------------------------------------------
+                                        | End Implement
+    |-------------------------------------------------------------------------- */
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Implement Unfollow
+    |--------------------------------------------------------------------------
+    |
+    | The Method used to Get Number of Following for Everyone
+    |
+    */
 
     @Override
     public ResponseEntity<?> getUserFriends(Integer userId) {
@@ -480,46 +491,13 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    /*|--------------------------------------------------------------------------
+                                        | End Implement
+    |-------------------------------------------------------------------------- */
 
 
 
 
-
-
-    @Override
-    public ResponseEntity<?> toggleFollowUser(Integer userId1, Integer userId2) {
-        User user1 = userRepo.findUserById(userId1);
-        User user2 = userRepo.findUserById(userId2);
-
-        if (Objects.equals(userId1, userId2)) {
-            return ApiTrait.errorMessage(null, "Cannot follow/unfollow yourself", HttpStatus.BAD_REQUEST);
-        } else if (user1 != null && user2 != null) {
-            // If user1 is following user2, unfollow; else follow
-            if (user1.getFollowings().contains(user2)) {
-                // User1 is following user2, so unfollow
-                user1.getFollowings().remove(user2);
-                user2.getFollowers().remove(user1);
-                // Save changes
-                userRepo.save(user1);
-                userRepo.save(user2);
-            } else {
-                // User1 is not following user2, so follow
-                user1.getFollowings().add(user2);
-                user2.getFollowers().add(user1);
-                // Save changes
-                userRepo.save(user1);
-                userRepo.save(user2);
-            }
-
-
-
-            // Return success message
-            String action = user1.getFollowings().contains(user2) ? "followed" : "unfollowed";
-            return ApiTrait.successMessage("User " + action + " successfully", HttpStatus.ACCEPTED);
-        } else {
-            return ApiTrait.errorMessage(null, "User(s) not found", HttpStatus.NOT_FOUND);
-        }
-    }
 
 
 

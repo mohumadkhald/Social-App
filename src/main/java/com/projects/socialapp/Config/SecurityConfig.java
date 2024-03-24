@@ -8,8 +8,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -19,37 +21,37 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+    private final LogoutHandler logoutHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http // Disables CSRF protection
-                .authorizeRequests()
-//                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/admin/mo").hasAuthority("ADMIN")
-                .requestMatchers("/api/auth/register","/api/auth/login").permitAll() // Allow access to specific public endpoints
-                .anyRequest().authenticated()
-                .and()
+
+        http
+                .authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers("/admin/mo")
+                        .hasAuthority("ADMIN")
+                        .requestMatchers("/api/auth/register", "/api/auth/login")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated())
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-        .csrf(AbstractHttpConfigurer::disable);
+                .logout(logout->logout
+                        .logoutUrl("/api/auth/logout")
+                        .addLogoutHandler(logoutHandler)
+                        .logoutSuccessHandler(
+                                (request, response, authentication) ->
+                                        SecurityContextHolder
+                                                .clearContext()
+                        ))
+                .csrf(AbstractHttpConfigurer::disable);
+
+//                .headers(headers ->
+//                        headers.addHeaderWriter(new ClearSiteDataHeaderWriter(ClearSiteDataHeaderWriter.Directive.CACHE))
+//                                .addHeaderWriter(new ClearSiteDataHeaderWriter(ClearSiteDataHeaderWriter.Directive.COOKIES))
+//                                .addHeaderWriter(new ClearSiteDataHeaderWriter(ClearSiteDataHeaderWriter.Directive.STORAGE)));
         return http.build();
     }
-
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/api/v1/auth/register","/api/v1/auth/login").permitAll() // Allow access to specific public endpoints
-//                        .requestMatchers("/user").hasRole("USER")
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
-//                        .anyRequest().authenticated()
-//                )
-//
-//                .csrf(AbstractHttpConfigurer::disable);
-//        return http.build();
-//    }
-
-
-
 
 
 }
