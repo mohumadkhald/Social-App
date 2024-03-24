@@ -10,11 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostRequestDto {
+public class ReelRequestDto {
     @NotEmpty
-    private String caption;
-    @NotEmpty
-    private String image;
+    private String title;
     @NotEmpty
     private String video;
     private Integer userId;

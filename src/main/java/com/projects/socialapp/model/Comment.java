@@ -28,6 +28,11 @@ public class Comment extends Base {
     @JsonBackReference
     private Post post;
 
+//    @ManyToOne
+//    @JoinColumn(name="reelId")
+//    @JsonBackReference
+//    private Reel reel;
+
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "user_comment_likes",

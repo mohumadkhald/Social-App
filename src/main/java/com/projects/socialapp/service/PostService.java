@@ -11,18 +11,23 @@ import java.util.List;
 
 public interface PostService {
     PostResponseDto createNewPost(PostRequestDto post) throws Exception;
+
+    PostResponseDto editPost(PostRequestDto postRequestDto, Integer postId, Integer userId) throws Exception;
+
     String deletePost(Integer postId, Integer userId) throws AccessDeniedException;
 
     List<PostResponseWithUserDto> findPostsByUserId(Integer userId);
 
     PostResponseWithUserDto findPostByPostId(Integer PostId);
-    List<Post> findAllPost();
+    List<PostResponseWithUserDto> findAllPost();
     Post savedPost(Integer postId, Integer userId);
 
 
     ResponseEntity<?> getUsersWhoLikedPost(Integer postId);
 
     ResponseEntity<?> likeUnlikePost(Integer postId, Integer userId);
+
+    List<PostResponseWithUserDto> findPostByCaption(String caption);
 
     // Ensure transactional operation
 }

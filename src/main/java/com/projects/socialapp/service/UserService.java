@@ -1,5 +1,6 @@
 package com.projects.socialapp.service;
 
+import com.projects.socialapp.model.User;
 import com.projects.socialapp.requestDto.RegisterRequestDto;
 import com.projects.socialapp.responseDto.UserResponseDto;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 public interface UserService {
 
     Integer findUserIdByJwt(String jwt);
+
+    User findById(Integer id);
 
     // Method Create User
     UserResponseDto registerUser(RegisterRequestDto dto);

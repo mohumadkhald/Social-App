@@ -17,12 +17,11 @@ public interface CommentService {
 
     List<CommentResponseWithUserDto> findAllCommentsByPostId(Integer userId);
 
-
-    CommentResponseWithUserDto findCommentByCommentId(Integer commentId);
-
     ResponseEntity<?> getUsersWhoLikedComment(Integer commentId, Integer postId);
 
     ResponseEntity<?> likeUnlikeComment(Integer commentId, Integer userId, Integer postId);
+
+    CommentResponseWithUserDto findCommentById(Integer commentId, Integer postId);
 
 
     // Ensure transactional operation

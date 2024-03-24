@@ -56,6 +56,13 @@ public class User extends Base implements UserDetails {
     @JsonManagedReference
     private List<Comment> comments;
 
+    @OneToMany(
+            mappedBy = "user"
+    )
+    @JsonManagedReference
+    private List<Reel> reels;
+
+
 
     @ManyToMany(mappedBy = "likedByUsers", cascade = CascadeType.ALL)
     private Set<Post> likedPosts = new HashSet<>();
@@ -63,6 +70,13 @@ public class User extends Base implements UserDetails {
 
     @ManyToMany(mappedBy = "likedByUsers", cascade = CascadeType.ALL)
     private Set<Comment> likedComments = new HashSet<>();
+
+    @ManyToMany(mappedBy = "likedByUsers", cascade = CascadeType.ALL)
+    private Set<Reel> likedReels = new HashSet<>();
+
+    @ManyToMany
+    @JsonManagedReference
+    private List<Chat> chats = new ArrayList<>();
 
     // very important
     @Override
@@ -99,6 +113,8 @@ public class User extends Base implements UserDetails {
     public String getUsername() {
         return email;
     }
+
+
     @Override
     public String getPassword() {
         return password;

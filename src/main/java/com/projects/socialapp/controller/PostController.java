@@ -1,6 +1,5 @@
 package com.projects.socialapp.controller;
 
-import com.projects.socialapp.model.Post;
 import com.projects.socialapp.requestDto.PostRequestDto;
 import com.projects.socialapp.responseDto.PostResponseDto;
 import com.projects.socialapp.responseDto.PostResponseWithUserDto;
@@ -31,8 +30,14 @@ public class PostController {
     public PostResponseWithUserDto getPostDetails(@PathVariable Integer postId) {
         return postService.findPostByPostId(postId);
     }
+    @PutMapping("/{postId}")
+    public PostResponseDto editComment(@PathVariable Integer postId, @Valid @RequestBody PostRequestDto postRequestDto, @RequestHeader("Authorization") String jwtToken) throws Exception{
+        Integer userId = userService.findUserIdByJwt(jwtToken);
+        postRequestDto.setUserId(userId);
+        return postService.editPost(postRequestDto, postId, userId);
+    }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/users/{userId}")
     public List<PostResponseWithUserDto> getPostsByUserId(@PathVariable Integer userId) {
         return postService.findPostsByUserId(userId);
     }
@@ -44,7 +49,7 @@ public class PostController {
     }
 
     @GetMapping("/all")
-    public List<Post> getAllPosts() {
+    public List<PostResponseWithUserDto> getAllPosts() {
         return postService.findAllPost();
     }
 
@@ -60,6 +65,7 @@ public class PostController {
     public ResponseEntity<?> getUsersWhoLikedPost(@PathVariable Integer postId) {
         return postService.getUsersWhoLikedPost(postId);
     }
+
 
 
 }

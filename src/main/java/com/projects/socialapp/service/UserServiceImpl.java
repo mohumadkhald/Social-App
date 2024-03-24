@@ -62,6 +62,14 @@ public class UserServiceImpl implements UserService {
 
         return user.getId();
     }
+
+    @Override
+    public User findById(Integer id) {
+        return userRepo.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+    }
+
+
     /*|--------------------------------------------------------------------------
                                     | End Implement
     |-------------------------------------------------------------------------- */
