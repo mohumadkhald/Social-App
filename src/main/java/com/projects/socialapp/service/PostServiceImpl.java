@@ -2,6 +2,7 @@ package com.projects.socialapp.service;
 
 import com.projects.socialapp.Repo.PostRepo;
 import com.projects.socialapp.Repo.UserRepo;
+import com.projects.socialapp.expection.NotAuthorizeException;
 import com.projects.socialapp.expection.PostNotFoundException;
 import com.projects.socialapp.expection.UserNotFoundException;
 import com.projects.socialapp.mapper.PostMapper;
@@ -46,7 +47,7 @@ public class PostServiceImpl implements PostService{
 
         // Check if the post belongs to the specified userId
         if (!post.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("You are not authorized to delete this post");
+            throw new NotAuthorizeException("You are not Authorized to Delete this Post");
         }
         // Delete the post
         postRepo.delete(post);

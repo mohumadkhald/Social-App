@@ -74,7 +74,7 @@ public class UserController {
     |--------------------------------------------------------------------------
     */
     @PutMapping("/{id}")
-    public ResponseEntity<?> editUser(@PathVariable Integer id, @RequestBody RegisterRequestDto newData)
+    public ResponseEntity<?> editUser(@PathVariable Integer id,@Valid @RequestBody RegisterRequestDto newData)
     {
 
         return userService.updateUser(id, newData);

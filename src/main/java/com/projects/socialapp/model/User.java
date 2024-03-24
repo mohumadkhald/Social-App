@@ -4,25 +4,22 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.projects.socialapp.token.Token;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "users")
-public class User implements UserDetails {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class User extends Base implements UserDetails {
     private Integer id;
     private String firstname;
     private String lastname;
@@ -53,59 +50,25 @@ public class User implements UserDetails {
     @JsonManagedReference
     private List<Post> posts;
 
-
+    @OneToMany(
+            mappedBy = "user"
+    )
+    @JsonManagedReference
+    private List<Comment> comments;
 
 
     @ManyToMany(mappedBy = "likedByUsers", cascade = CascadeType.ALL)
     private Set<Post> likedPosts = new HashSet<>();
 
 
+    @ManyToMany(mappedBy = "likedByUsers", cascade = CascadeType.ALL)
+    private Set<Comment> likedComments = new HashSet<>();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // very important
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstname, lastname, email); // Include relevant fields for uniqueness
+    }
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

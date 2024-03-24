@@ -13,20 +13,19 @@ import java.util.HashMap;
 @ControllerAdvice
 @RestController
 
-public class PostException {
+public class CommentsException {
 
-    public PostException(ApiTrait apiTrait) {
+    public CommentsException() {
     }
 
 
 
-    @ExceptionHandler(PostNotFoundException.class)
-    public ResponseEntity<?> handleUserNotFoundException(PostNotFoundException ex, WebRequest request) {
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<?> handleUserNotFoundException(CommentNotFoundException ex, WebRequest request) {
         HashMap<String, String> error = new HashMap<>();
         error.put("Post", "Post Not Found"); // Assuming "user" is the field causing the error
         return  ApiTrait.errorMessage(error, ex.getMessage(), HttpStatus.NOT_FOUND);
     }
-
 
 
 }

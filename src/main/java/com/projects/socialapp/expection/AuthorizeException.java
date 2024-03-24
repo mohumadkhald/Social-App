@@ -13,18 +13,17 @@ import java.util.HashMap;
 @ControllerAdvice
 @RestController
 
-public class PostException {
+public class AuthorizeException {
 
-    public PostException(ApiTrait apiTrait) {
+    public AuthorizeException(ApiTrait apiTrait) {
     }
 
 
 
-    @ExceptionHandler(PostNotFoundException.class)
-    public ResponseEntity<?> handleUserNotFoundException(PostNotFoundException ex, WebRequest request) {
+    @ExceptionHandler(NotAuthorizeException.class)
+    public ResponseEntity<?> handleUserNotAuthException(NotAuthorizeException ex, WebRequest request) {
         HashMap<String, String> error = new HashMap<>();
-        error.put("Post", "Post Not Found"); // Assuming "user" is the field causing the error
-        return  ApiTrait.errorMessage(error, ex.getMessage(), HttpStatus.NOT_FOUND);
+        return  ApiTrait.errorMessage(error, ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
 
