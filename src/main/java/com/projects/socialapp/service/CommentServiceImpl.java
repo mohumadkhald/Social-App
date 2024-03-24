@@ -121,26 +121,6 @@ public class CommentServiceImpl implements CommentService{
 
 
 
-    @Override
-    public CommentResponseWithUserDto findCommentByCommentId(Integer commentId) {
-        // Check if the comment ID is provided
-        if (commentId == null) {
-            throw new IllegalArgumentException("Comment ID Missing.");
-        }
-        Comment comment = commentRepo.findById(commentId)
-                .orElseThrow(() -> new CommentNotFoundException("Comment not found with id: " + commentId));
-
-        // Now fetch the associated user information
-        User user = comment.getUser();
-
-        // Create a DTO that includes both comment information and user's name
-        CommentResponseWithUserDto commentResponseWithUserDto = new CommentResponseWithUserDto();
-        commentResponseWithUserDto.setId(comment.getId());
-        commentResponseWithUserDto.setContent(comment.getContent());
-        commentResponseWithUserDto.setUserName(comment.getUser().getFirstname());
-
-        return commentResponseWithUserDto;
-    }
 
 
 
@@ -176,6 +156,29 @@ public class CommentServiceImpl implements CommentService{
             // Return success response for like
             return ResponseEntity.ok().body("Comment liked successfully");
         }
+    }
+
+    @Override
+    public CommentResponseWithUserDto findCommentById(Integer commentId, Integer postId) {
+        // Check if the comment ID is provided
+        if (commentId == null) {
+            throw new IllegalArgumentException("Comment ID Missing.");
+        }
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + postId));
+        Comment comment = commentRepo.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException("Comment not found with id: " + commentId));
+
+        // Now fetch the associated user information
+        User user = comment.getUser();
+
+        // Create a DTO that includes both comment information and user's name
+        CommentResponseWithUserDto commentResponseWithUserDto = new CommentResponseWithUserDto();
+        commentResponseWithUserDto.setId(comment.getId());
+        commentResponseWithUserDto.setContent(comment.getContent());
+        commentResponseWithUserDto.setUserName(comment.getUser().getFirstname());
+
+        return commentResponseWithUserDto;
     }
 
     @Override

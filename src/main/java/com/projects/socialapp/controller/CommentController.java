@@ -27,6 +27,11 @@ public class CommentController {
 
         return commentService.createNewComment(commentRequestDto);
     }
+    @GetMapping("/{commentId}")
+    public CommentResponseWithUserDto findCommentById(@PathVariable Integer commentId, @PathVariable Integer postId)
+    {
+        return commentService.findCommentById(commentId, postId);
+    }
     
     @PutMapping("/{commentId}")
     public CommentResponseDto editComment(@PathVariable Integer postId, @Valid @RequestBody CommentRequestDto commentRequestDto, @RequestHeader("Authorization") String jwtToken, @PathVariable Integer commentId) throws Exception{

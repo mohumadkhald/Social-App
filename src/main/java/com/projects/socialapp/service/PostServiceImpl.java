@@ -2,6 +2,7 @@ package com.projects.socialapp.service;
 
 import com.projects.socialapp.Repo.PostRepo;
 import com.projects.socialapp.Repo.UserRepo;
+import com.projects.socialapp.expection.CommentNotFoundException;
 import com.projects.socialapp.expection.NotAuthorizeException;
 import com.projects.socialapp.expection.PostNotFoundException;
 import com.projects.socialapp.expection.UserNotFoundException;
@@ -13,14 +14,11 @@ import com.projects.socialapp.responseDto.PostResponseDto;
 import com.projects.socialapp.responseDto.PostResponseWithUserDto;
 import com.projects.socialapp.traits.ApiTrait;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.AccessDeniedException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,7 +38,46 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public String deletePost(Integer postId, Integer userId) throws AccessDeniedException {
+    public PostResponseDto editPost(PostRequestDto postRequestDto, Integer postId, Integer userId) throws Exception {
+        try {
+            // Check if the comment ID is provided
+            if (userId == null || postId == null) {
+                throw new IllegalArgumentException("User ID or Post ID Messing.");
+            }
+            Post post = postRepo.findById(postId)
+                    .orElseThrow(() -> new CommentNotFoundException("Post not found with id: " + postId));
+            if (!post.getUser().getId().equals(userId)) {
+                throw new NotAuthorizeException("You are not Authorized to Edit this Post");
+            }
+
+            // Retrieve the existing comment from the database based on its ID
+            Optional<Post> existingPostOptional = postRepo.findById(postId);
+            if (existingPostOptional.isPresent()) {
+                // Update the content of the existing comment
+                Post existingPost = existingPostOptional.get();
+                existingPost.setCaption(postRequestDto.getCaption());
+                existingPost.setCaption(postRequestDto.getImage());
+                existingPost.setVideo(postRequestDto.getVideo());
+
+
+
+                // Save the updated comment
+                Post savedPost = postRepo.save(existingPost);
+
+                // Convert the saved comment to CommentResponseDto and return
+                return postMapper.toPostDto(savedPost);
+            } else {
+                throw new PostNotFoundException("Post not found with ID: " + postId);
+            }
+        } catch (DataIntegrityViolationException e) {
+            // Handle database constraint violation exceptions
+            throw new Exception("Failed to edit comment: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public String deletePost(Integer postId, Integer userId)
+    {
         // Retrieve the post by postId
         Post post = postRepo.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with id: " + postId));
@@ -63,18 +100,7 @@ public class PostServiceImpl implements PostService{
             throw new PostNotFoundException("No posts found for user with id: " + userId);
         }
 
-        List<PostResponseWithUserDto> postResponseList = new ArrayList<>();
-        for (Post post : posts) {
-            PostResponseWithUserDto postResponseDto = new PostResponseWithUserDto();
-            postResponseDto.setId(post.getId());
-            postResponseDto.setCaption(post.getCaption());
-            postResponseDto.setVideo(post.getVideo());
-            postResponseDto.setImage(post.getImage());
-            postResponseDto.setUserName(post.getUser().getFirstname());
-            postResponseList.add(postResponseDto);
-        }
-
-        return postResponseList;
+        return getPostResponseWithUserDto(posts);
     }
 
 
@@ -99,8 +125,25 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public List<Post> findAllPost() {
-        return postRepo.findAll();
+    public List<PostResponseWithUserDto> findAllPost() {
+        List<Post> posts = postRepo.findAll();
+
+        return getPostResponseWithUserDto(posts);
+    }
+
+    private List<PostResponseWithUserDto> getPostResponseWithUserDto(List<Post> posts) {
+        List<PostResponseWithUserDto> postResponseList = new ArrayList<>();
+        for (Post post : posts) {
+            PostResponseWithUserDto postResponseDto = new PostResponseWithUserDto();
+            postResponseDto.setId(post.getId());
+            postResponseDto.setCaption(post.getCaption());
+            postResponseDto.setVideo(post.getVideo());
+            postResponseDto.setImage(post.getImage());
+            postResponseDto.setUserName(post.getUser().getFirstname());
+            postResponseList.add(postResponseDto);
+        }
+
+        return postResponseList;
     }
 
     @Override
@@ -161,6 +204,16 @@ public class PostServiceImpl implements PostService{
         }
     }
 
+    @Override
+    public List<PostResponseWithUserDto> findPostByCaption(String caption)
+    {
+        List<Post> posts = postRepo.findAllByCaption(caption);
+        if (posts.isEmpty()) {
+            throw new PostNotFoundException("No posts found for user with this name: " + caption);
+        }
+
+        return getPostResponseWithUserDto(posts);
+    }
 
 
 

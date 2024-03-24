@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface PostRepo extends JpaRepository<Post, Integer> {
     List<Post> findAllByUserId(Integer userId);
+
+    List<Post> findAllByCaption(String caption);
 }
