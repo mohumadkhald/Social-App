@@ -1,5 +1,6 @@
 package com.projects.socialapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.projects.socialapp.token.Token;
 import jakarta.persistence.*;
@@ -17,7 +18,6 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@EqualsAndHashCode(callSuper = true)
 @Table(name = "users")
 public class User extends Base implements UserDetails {
     private Integer id;
@@ -84,6 +84,7 @@ public class User extends Base implements UserDetails {
         return Objects.hash(id, firstname, lastname, email); // Include relevant fields for uniqueness
     }
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_followers",
@@ -91,6 +92,7 @@ public class User extends Base implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "follower_id"))
     private Set<User> followers;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "followers", fetch = FetchType.EAGER)
     private Set<User> followings;
 

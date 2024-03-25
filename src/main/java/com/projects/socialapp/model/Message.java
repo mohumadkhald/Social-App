@@ -1,31 +1,29 @@
 package com.projects.socialapp.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
-
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Setter
 @Getter
-@AllArgsConstructor
+@Setter
 @NoArgsConstructor
-
-public class Message extends Base{
-    private String content;
-    private String img;
-
-    private LocalDateTime timestamp;
+@AllArgsConstructor
+public class Message extends Base {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @ManyToOne
-    private User user;
+    private User sender;
 
-//    @JsonIgnore
+    @ManyToOne
+    private User receiver;
+
     @ManyToOne
     private Chat chat;
 
-
-
+    private String content;
 }

@@ -8,11 +8,13 @@ import java.util.List;
 
 public interface ChatService {
 
-    List<Chat> findChatById(Integer chatId) throws Exception;
 
-    List<Chat> findUsersChat(Integer userId);
+    List<ChatUserDto> findUsersChat(Integer userId);
 
 
     List<ChatUserDto> createChat(ChatRequestDto chatRequestDto);
 
+    Chat findById(Integer userId);
+
+    List<ChatUserDto> findChatById(Integer chatId) throws Exception;
 }

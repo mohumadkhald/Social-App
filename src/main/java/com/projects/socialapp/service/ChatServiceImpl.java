@@ -8,8 +8,8 @@ import com.projects.socialapp.responseDto.ChatUserDto;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ChatServiceImpl implements ChatService{
@@ -24,26 +24,23 @@ public class ChatServiceImpl implements ChatService{
     @Override
     public List<ChatUserDto> createChat(ChatRequestDto chatRequestDto) {
         var chat = chatMapper.toChat(chatRequestDto);
-        var savedComment = chatRepo.save(chat);
-        return chatMapper.toChatDto(savedComment);
+        var saved = chatRepo.save(chat);
+        return chatMapper.toChatDto(saved, null);
 
 
     }
+
+    @Override
+    public Chat findById(Integer userId) {
+        return null;
+    }
+
 
     @Transactional
     public Chat saveChat(Chat chat) {
         return chatRepo.save(chat);
     }
 
-    @Override
-    public List<Chat> findChatById(Integer chatId) throws Exception {
-        Optional<Chat> optionalChat = chatRepo.findById(chatId);
-        if(optionalChat.isEmpty())
-        {
-            throw new Exception("chat not found");
-        }
-        return (List<Chat>) optionalChat.get();
-    }
 
 
 
@@ -65,4 +62,30 @@ public class ChatServiceImpl implements ChatService{
 
         return chatUserDtos; // Return the list of DTOs
     }
+
+
+
+    @Override
+    public List<ChatUserDto> findChatById(Integer chatId, Integer userId) throws Exception {
+        // Find the chat entity by chatId
+        Chat chat = chatRepo.findChatById(chatId);
+
+        // Check if chat is null
+        if (chat == null) {
+            throw new Exception("Chat not found for chatId: " + chatId);
+        }
+
+        // Convert the Chat entity to a list of ChatUserDto
+        List<ChatUserDto> chatUserDtoList = chatMapper.toChatDto(chat, userId);
+
+        // Check if the list is empty
+        if (chatUserDtoList.isEmpty()) {
+            throw new Exception("No ChatUserDto found for chatId: " + chatId);
+        }
+
+        // Return the list of ChatUserDto
+        return chatUserDtoList;
+    }
+
+
 }

@@ -1,0 +1,61 @@
+package com.projects.socialapp.controller;
+
+import com.projects.socialapp.requestDto.MessageRequestDto;
+import com.projects.socialapp.responseDto.MessageResponseWithUserDto;
+import com.projects.socialapp.service.ChatService;
+import com.projects.socialapp.service.MessageService;
+import com.projects.socialapp.service.UserService;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Objects;
+
+@RestController
+@RequestMapping("/api/messages")
+@AllArgsConstructor
+public class MessageController {
+    private final MessageService messageService;
+    private final UserService userService;
+    private final ChatService chatService;
+    @PostMapping("/{chatId}")
+    public MessageResponseWithUserDto createMessage(@PathVariable Integer chatId,
+                                                    @Valid @RequestBody MessageRequestDto messageRequestDto,
+                                                    @RequestHeader("Authorization") String jwtToken) throws Exception {
+        Integer userId = userService.findUserIdByJwt(jwtToken);
+        var chat = chatService.findChatById(chatId, userId);
+
+        // Assuming you have a method to extract receiver ID from the chat
+        Integer receiverId;
+        if (!Objects.equals(chat.get(0).getId(), userId))
+        {
+             receiverId = chat.get(0).getId();
+        } else {
+             receiverId = chat.get(1).getId();
+        }
+
+        messageRequestDto.setSender(userId);
+        messageRequestDto.setChatId(chatId);
+        messageRequestDto.setReceiver(receiverId);
+
+        // Create a new message
+        return messageService.createNewMessage(messageRequestDto);
+
+    }
+
+    @GetMapping("/{chatId}")
+    public List<MessageResponseWithUserDto>
+    getMessageDetails(@PathVariable Integer chatId,
+                      @RequestHeader("Authorization") String jwtToken) throws Exception {
+        Integer userId = userService.findUserIdByJwt(jwtToken);
+        return messageService.findAllMessagesByChatId(chatId, userId);
+    }
+
+//    @GetMapping("/{messageId}")
+//    public MessageResponseWithUserDto getMessageDetails(@PathVariable Integer messageId) {
+//        return messageService.findMessageByMessageId(messageId);
+//    }
+//
+
+}

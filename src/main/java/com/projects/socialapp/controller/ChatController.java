@@ -1,6 +1,5 @@
 package com.projects.socialapp.controller;
 
-import com.projects.socialapp.model.Chat;
 import com.projects.socialapp.model.User;
 import com.projects.socialapp.requestDto.ChatRequestDto;
 import com.projects.socialapp.responseDto.ChatUserDto;
@@ -37,9 +36,14 @@ public class ChatController {
     }
 
     @GetMapping
-    public List<Chat> findAllChatsUser(@RequestHeader("Authorization") String jwtToken)
+    public List<ChatUserDto> findAllChatsUser(@RequestHeader("Authorization") String jwtToken)
     {
         Integer userId = userService.findUserIdByJwt(jwtToken);
         return chatService.findUsersChat(userId);
+    }
+
+    @GetMapping("{chatId}")
+    public  List<ChatUserDto> findChat(@PathVariable Integer chatId) throws Exception {
+        return  chatService.findChatById(chatId);
     }
 }

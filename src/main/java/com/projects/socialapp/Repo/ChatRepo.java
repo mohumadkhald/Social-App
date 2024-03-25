@@ -5,11 +5,9 @@ import com.projects.socialapp.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface ChatRepo extends JpaRepository<Chat, Integer> {
 
     @Query("SELECT c FROM Chat c JOIN c.users u WHERE u.id = :userId")
@@ -23,5 +21,5 @@ public interface ChatRepo extends JpaRepository<Chat, Integer> {
     Chat findChatByUserIds(@Param("userId1") Integer userId1, @Param("userId2") Integer userId2);
 
 
-
+    Chat findChatById(Integer chatId);
 }

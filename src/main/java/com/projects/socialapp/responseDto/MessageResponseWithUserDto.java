@@ -7,11 +7,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ChatUserDto {
-    private Integer chatID;
-    private String chatName;
-    private String img_path;
+public class MessageResponseWithUserDto {
     private Integer id;
-    private String first_name;
-    private String last_name;
+    private String content;
+//    private String image;
+    private String sender;
+    private String receiver;
+    private String time;
+
 }
