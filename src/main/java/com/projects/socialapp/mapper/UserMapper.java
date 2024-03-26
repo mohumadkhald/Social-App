@@ -41,7 +41,6 @@ public class UserMapper {
         return new UserResponseDto(user.getId(),
                 user.getFirstname(),
                 user.getLastname(),
-                user.getEmail(),
                 user.getGender()
         );
     }

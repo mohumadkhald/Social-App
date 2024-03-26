@@ -25,7 +25,7 @@ public class ChatServiceImpl implements ChatService{
     public List<ChatUserDto> createChat(ChatRequestDto chatRequestDto) {
         var chat = chatMapper.toChat(chatRequestDto);
         var saved = chatRepo.save(chat);
-        return chatMapper.toChatDto(saved, null);
+        return chatMapper.toChatDto(saved);
 
 
     }
@@ -56,7 +56,7 @@ public class ChatServiceImpl implements ChatService{
         for (Chat chat : chats) {
 
             // Convert Chat entity to DTO using chatMapper, passing both the Chat and otherUser
-            List<ChatUserDto> chatUserDtoList = chatMapper.toChatDto(chat, userId);
+            List<ChatUserDto> chatUserDtoList = chatMapper.toChatDto(chat);
             chatUserDtos.addAll(chatUserDtoList); // Add all DTOs to the list
         }
 
@@ -66,7 +66,7 @@ public class ChatServiceImpl implements ChatService{
 
 
     @Override
-    public List<ChatUserDto> findChatById(Integer chatId, Integer userId) throws Exception {
+    public List<ChatUserDto> findChatById(Integer chatId) throws Exception {
         // Find the chat entity by chatId
         Chat chat = chatRepo.findChatById(chatId);
 
@@ -76,7 +76,7 @@ public class ChatServiceImpl implements ChatService{
         }
 
         // Convert the Chat entity to a list of ChatUserDto
-        List<ChatUserDto> chatUserDtoList = chatMapper.toChatDto(chat, userId);
+        List<ChatUserDto> chatUserDtoList = chatMapper.toChatDto(chat);
 
         // Check if the list is empty
         if (chatUserDtoList.isEmpty()) {

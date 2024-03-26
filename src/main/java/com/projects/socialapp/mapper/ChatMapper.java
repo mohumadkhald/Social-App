@@ -52,14 +52,14 @@ public class ChatMapper {
     }
 
 
-    public List<ChatUserDto> toChatDto(Chat chat, Integer currentId) {
+    public List<ChatUserDto> toChatDto(Chat chat) {
 
         List<ChatUserDto> chatUserDtos = new ArrayList<>();
         // Iterate over the list of users associated with the chat
         for (User user : chat.getUsers()) {
-            if (user.getId().equals(currentId)) {
-                continue; // Skip the current user
-            }
+//            if (user.getId().equals(currentId)) {
+//                continue; // Skip the current user
+//            }
             user = userService.findById(user.getId());
             // Assuming ChatRequestDto constructor accepts user IDs
             ChatUserDto chatUserDto = new ChatUserDto(chat.getId(),chat.getChat_name(), chat.getChat_img(), user.getId(), user.getFirstname(), user.getLastname());

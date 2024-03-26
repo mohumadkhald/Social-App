@@ -359,7 +359,7 @@ public class UserServiceImpl implements UserService {
 
             // Construct UserProfileDto
             UserProfileDto userProfileDto = UserProfileDto.fromUserResponseDto(
-                    new UserResponseDto(user.getId(), user.getFirstname(), user.getLastname(), user.getEmail(), user.getGender()),
+                    new UserResponseDto(user.getId(), user.getFirstname(), user.getLastname(), user.getGender()),
                     followersCount,
                     followingCount,
                     friendsCount);
@@ -402,7 +402,6 @@ public class UserServiceImpl implements UserService {
                             follower.getId(),
                             follower.getFirstname(),
                             follower.getLastname(),
-                            follower.getEmail(),
                             follower.getGender()))
                     .collect(Collectors.toList());
 
@@ -442,7 +441,6 @@ public class UserServiceImpl implements UserService {
                             followingUser.getId(),
                             followingUser.getFirstname(),
                             followingUser.getLastname(),
-                            followingUser.getEmail(),
                             followingUser.getGender()))
                     .collect(Collectors.toList());
 
@@ -489,7 +487,6 @@ public class UserServiceImpl implements UserService {
                             friend.getId(),
                             friend.getFirstname(),
                             friend.getLastname(),
-                            friend.getEmail(),
                             friend.getGender()))
                     .collect(Collectors.toList());
 

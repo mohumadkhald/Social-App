@@ -41,6 +41,19 @@ public class UserController {
     }
 
 
+    /*
+   |--------------------------------------------------------------------------
+   | API Routes Get User By Id
+   |--------------------------------------------------------------------------
+   */
+    @GetMapping("/profile")
+    public ResponseEntity<?> profile(@RequestHeader("Authorization") String jwtToken)
+    {
+        Integer userId = userService.findUserIdByJwt(jwtToken);
+        return userService.getUserProfile(userId);
+    }
+
+
 
 
     /*

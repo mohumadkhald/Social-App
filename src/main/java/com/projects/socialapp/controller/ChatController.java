@@ -30,8 +30,6 @@ public class ChatController {
         chatRequestDto.setUserId1(userId);
         chatRequestDto.setUserId2(userId2);
 
-
-
         return chatService.createChat(chatRequestDto);
     }
 
@@ -43,7 +41,18 @@ public class ChatController {
     }
 
     @GetMapping("{chatId}")
-    public  List<ChatUserDto> findChat(@PathVariable Integer chatId) throws Exception {
+    public  List<ChatUserDto> findChat(@PathVariable Integer chatId, @RequestHeader("Authorization") String jwtToken) throws Exception {
+        Integer userId = userService.findUserIdByJwt(jwtToken);
+        var chat = chatService.findChatById(chatId);
+        List<Integer> participantIds = chat.stream()
+                .map(ChatUserDto::getId)
+                .toList();
+
+        // Check if the userId is among the participants
+        if (!participantIds.contains(userId)) {
+            throw new IllegalArgumentException("User is not a participant of the chat");
+        }
+
         return  chatService.findChatById(chatId);
     }
 }

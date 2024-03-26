@@ -10,9 +10,8 @@ import lombok.Setter;
 public class MessageResponseWithUserDto {
     private Integer id;
     private String content;
-//    private String image;
+    private String image;
     private String sender;
     private String receiver;
     private String time;
-
 }

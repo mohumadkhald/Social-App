@@ -25,5 +25,18 @@ public class Message extends Base {
     @ManyToOne
     private Chat chat;
 
+    @Lob
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
+
+    private String img;
+        // big dat
+    //    @Lob
+    //    @Column(name = "content", columnDefinition = "LONGTEXT")
+    //    private String content;
+
+
+    private String deletedByUser;
+
+
 }

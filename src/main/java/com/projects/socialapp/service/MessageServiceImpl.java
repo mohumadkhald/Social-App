@@ -1,15 +1,19 @@
 package com.projects.socialapp.service;
 
 import com.projects.socialapp.Repo.MessageRepo;
-import com.projects.socialapp.Repo.UserRepo;
+import com.projects.socialapp.expection.MessageNotFoundException;
+import com.projects.socialapp.expection.NotAuthorizeException;
 import com.projects.socialapp.mapper.MessageMapper;
 import com.projects.socialapp.model.Message;
 import com.projects.socialapp.requestDto.MessageRequestDto;
+import com.projects.socialapp.responseDto.ChatUserDto;
 import com.projects.socialapp.responseDto.MessageResponseWithUserDto;
 import com.projects.socialapp.traits.ApiTrait;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +21,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class MessageServiceImpl implements MessageService{
     private final ApiTrait apiTrait;
-    private final UserRepo userRepo;
     private final MessageRepo messageRepo;
     private final MessageMapper messageMapper;
     private final ChatService chatService;
@@ -57,85 +60,82 @@ public class MessageServiceImpl implements MessageService{
         if (!userId.equals(id1) && !userId.equals(id2)) {
             throw new IllegalArgumentException("Sender is not a participant of the chat");
         }
+
         List<Message> messages = messageRepo.findAllByChatId(chatId);
-        return messages.stream()
+
+        // Filter out messages that the sender has marked as deleted
+        List<Message> nonDeletedMessages = messages.stream()
+                .filter(message -> {
+                    String deletedByUser = message.getDeletedByUser();
+                    // Check if the deletedByUser field is null or does not contain the user ID
+                    return deletedByUser == null || !Arrays.asList(deletedByUser.split(",")).contains(String.valueOf(userId));
+                })
+                .toList();
+
+        return nonDeletedMessages.stream()
                 .map(messageMapper::toMessageDto)
                 .collect(Collectors.toList());
+
+
     }
 
 
 
-//    @Override
-//    public String deleteMessage(Integer messageId, Integer userId)
-//    {
-//        // Retrieve the message by messageId
-//        Message message = messageRepo.findById(messageId)
-//                .orElseThrow(() -> new MessageNotFoundException("Message not found with id: " + messageId));
-//
-//        // Check if the message belongs to the specified userId
-//        if (!message.getUser().getId().equals(userId)) {
-//            throw new NotAuthorizeException("You are not Authorized to Delete this Message");
-//        }
-//        // Delete the message
-//        messageRepo.delete(message);
-//
-//        return "Message deleted successfully";
-//    }
-//
-//
-//    @Override
-//    public List<MessageResponseWithUserDto> findMessagesByUserId(Integer userId) {
-//        List<Message> messages = messageRepo.findAllByUserId(userId);
-//        if (messages.isEmpty()) {
-//            throw new MessageNotFoundException("No messages found for user with id: " + userId);
-//        }
-//
-//        return getMessageResponseWithUserDto(messages);
-//    }
-//
-//
-//
-//    @Override
-//    public MessageResponseWithUserDto findMessageByMessageId(Integer messageId) {
-//        Message message = messageRepo.findById(messageId)
-//                .orElseThrow(() -> new MessageNotFoundException("Message not found with id: " + messageId));
-//
-//        // Now fetch the associated user information
-//        User user = message.getUser();
-//
-//        // Create a DTO that includes both message information and user's name
-//        MessageResponseWithUserDto messageResponseWithUserDto = new MessageResponseWithUserDto();
-//        messageResponseWithUserDto.setId(message.getId());
-//        messageResponseWithUserDto.setCaption(message.getCaption());
-//        messageResponseWithUserDto.setVideo(message.getVideo());
-//        messageResponseWithUserDto.setImage(message.getImage());
-//        messageResponseWithUserDto.setUserName(message.getUser().getFirstname());
-//
-//        return messageResponseWithUserDto;
-//    }
-//
-//    @Override
-//    public List<MessageResponseWithUserDto> findAllMessage() {
-//        List<Message> messages = messageRepo.findAll();
-//
-//        return getMessageResponseWithUserDto(messages);
-//    }
-//
-//    private List<MessageResponseWithUserDto> getMessageResponseWithUserDto(List<Message> messages) {
-//        List<MessageResponseWithUserDto> messageResponseList = new ArrayList<>();
-//        for (Message message : messages) {
-//            MessageResponseWithUserDto messageResponseDto = new MessageResponseWithUserDto();
-//            messageResponseDto.setId(message.getId());
-//            messageResponseDto.setCaption(message.getCaption());
-//            messageResponseDto.setVideo(message.getVideo());
-//            messageResponseDto.setImage(message.getImage());
-//            messageResponseDto.setUserName(message.getUser().getFirstname());
-//            messageResponseList.add(messageResponseDto);
-//        }
-//
-//        return messageResponseList;
-//    }
-//
+
+    @Override
+    public String deleteMessage(Integer messageId, Integer userId)
+    {
+        // Retrieve the message by messageId
+        Message message = messageRepo.findById(messageId)
+                .orElseThrow(() -> new MessageNotFoundException("Message not found with id: " + messageId));
+
+        // Check if the message belongs to the specified userId
+        if (!message.getSender().getId().equals(userId)) {
+            throw new NotAuthorizeException("You are not Authorized to Delete this Message");
+        }
+        deletedByUser(userId, message);
+
+        return "Message deleted successfully";
+    }
+
+    @Transactional
+    @Override
+    public String deleteAllMessageByChatId(Integer userId, Integer chatId) throws Exception {
+        var chat = chatService.findChatById(chatId);
+
+         List<Message> messages = messageRepo.findAllByChatId(chatId);
+
+
+        // Assuming you have a method to extract participant IDs from the chat
+        List<Integer> participantIds = chat.stream()
+                .map(ChatUserDto::getId)
+                .toList();
+
+        // Check if the userId is among the participants
+        if (!participantIds.contains(userId)) {
+            throw new IllegalArgumentException("User is not a participant of the chat");
+        }
+
+        // Delete all messages associated with the given chat ID
+//        messageRepo.deleteByChatId(chatId);
+
+        for (Message message : messages) {
+            deletedByUser(userId, message);
+        }
+
+        return "All messages sent by user with ID " + userId + " in chat with ID " + chatId + " have been hidden.";
+    }
+
+    private void deletedByUser(Integer userId, Message message) {
+        String deletedByUser = message.getDeletedByUser();
+        if (deletedByUser == null || !Arrays.asList(deletedByUser.split(",")).contains(String.valueOf(userId))) {
+            // If deletedByUser is null or user ID is not present, append the user ID
+            message.setDeletedByUser((deletedByUser == null ? "" : deletedByUser + ",") + userId);
+            messageRepo.save(message); // Update the message in the database
+        }
+    }
+
+
 //    @Override
 //    public Message savedMessage(Integer messageId, Integer userId) {
 //        return null;
@@ -192,17 +192,6 @@ public class MessageServiceImpl implements MessageService{
 //            // Return success response for like
 //            return ResponseEntity.ok().body("Message liked successfully");
 //        }
-//    }
-//
-//    @Override
-//    public List<MessageResponseWithUserDto> findMessageByCaption(String caption)
-//    {
-//        List<Message> messages = messageRepo.findAllByCaption(caption);
-//        if (messages.isEmpty()) {
-//            throw new MessageNotFoundException("No messages found for user with this name: " + caption);
-//        }
-//
-//        return getMessageResponseWithUserDto(messages);
 //    }
 //
 

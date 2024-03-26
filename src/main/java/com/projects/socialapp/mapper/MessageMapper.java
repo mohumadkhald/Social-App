@@ -36,9 +36,11 @@ public class MessageMapper {
         // Create the Message object and set its properties
         Message message = new Message();
         message.setContent(messageRequestDto.getContent());
+        message.setImg(messageRequestDto.getImg());
         message.setSender(sender);
         message.setReceiver(receiver);
         message.setChat(chat);
+        message.setDeletedByUser("");
 
         return message;
     }
@@ -59,7 +61,7 @@ public MessageResponseWithUserDto toMessageDto(Message message) {
         String formattedCreatedAt = createdAtInEgypt.format(formatter);
 
         // Construct the DTO with the sender's firstname
-        return new MessageResponseWithUserDto(message.getId(), message.getContent(),senderFirstname, reciverUsername, formattedCreatedAt);
+        return new MessageResponseWithUserDto(message.getId(), message.getContent(), message.getImg(),senderFirstname, reciverUsername, formattedCreatedAt);
     } else {
         // Handle the case where sender is null
         // You can throw an exception, return a default value, or handle it based on your application's requirements
