@@ -19,8 +19,10 @@ import java.util.*;
 @NoArgsConstructor
 @SuperBuilder
 @Table(name = "users")
-public class User extends Base implements UserDetails {
-    private Integer id;
+public class User extends Base  implements UserDetails {
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Integer id;
     private String firstname;
     private String lastname;
     private String gender;
@@ -81,7 +83,7 @@ public class User extends Base implements UserDetails {
     // very important
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstname, lastname, email); // Include relevant fields for uniqueness
+        return Objects.hash(firstname, lastname, email); // Include relevant fields for uniqueness
     }
 
     @JsonIgnore
