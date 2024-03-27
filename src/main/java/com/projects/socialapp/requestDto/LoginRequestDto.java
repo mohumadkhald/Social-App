@@ -15,4 +15,6 @@ public class LoginRequestDto {
     private String email;
     @NotEmpty
     private String password;
+    private boolean remember;
+
 }

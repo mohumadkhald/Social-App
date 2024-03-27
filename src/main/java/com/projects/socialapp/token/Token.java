@@ -18,6 +18,8 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String token;
+    private boolean rememberMe;
+
     @Enumerated(EnumType.STRING)
     private  TokenType tokenType;
 

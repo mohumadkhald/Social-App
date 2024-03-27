@@ -29,7 +29,7 @@ public class User extends Base  implements UserDetails {
     private String phone;
     private String email;
     private String password;
-    private boolean rememberMe;
+//    private boolean rememberMe;
 
 
 

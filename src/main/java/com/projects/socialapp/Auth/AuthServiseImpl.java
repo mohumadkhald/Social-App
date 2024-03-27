@@ -55,7 +55,6 @@ public class AuthServiseImpl implements AuthService {
                 .role(Role.USER)
                 .gender(request.getGender())
                 .phone(request.getPhone())
-                .rememberMe(request.isRemember())
                 .accountNonExpired(true) // Set accountNonExpired property
                 .accountNonLocked(true) // Set accountNonLocked property
                 .credentialsNonExpired(true) // Set credentialsNonExpired property
@@ -64,9 +63,9 @@ public class AuthServiseImpl implements AuthService {
             throw new EmailAlreadyExistsException("Email already exists");
         }
         var savedUser = userRepo.save(user);
-        int expirationDay = getExpirationDay(savedUser);
+        int expirationDay = getExpirationDay(false);
         var jwtToken = jwtService.generateToken(user, expirationDay);
-        savedUserToken(savedUser, jwtToken);
+        savedUserToken(savedUser, jwtToken, false);
         return AuthResponse.builder().token(jwtToken).message("Register Success Have A Nice Time").build();
     }
 
@@ -83,17 +82,20 @@ public class AuthServiseImpl implements AuthService {
     */
     public AuthResponse login(LoginRequestDto request) throws Exception {
         try {
+
+
             // Authenticate user
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
             // Retrieve user details
             var user = userRepo.findByEmail(request.getEmail());
 
-            int expirationDay = getExpirationDay(user);
+
+            int expirationDay = getExpirationDay(request.isRemember());
 
             // Generate JWT token
             var jwtToken = jwtService.generateToken(user, expirationDay);
-            savedUserToken(user, jwtToken);
+            savedUserToken(user, jwtToken, request.isRemember());
 
 
             // Return the token along with the user details
@@ -126,10 +128,11 @@ public class AuthServiseImpl implements AuthService {
 
 
     // Saved any token when user register or login
-    private void savedUserToken(User user, String jwtToken) {
+    private void savedUserToken(User user, String jwtToken, boolean status) {
         var myToken = Token.builder()
                 .user(user)
                 .token(jwtToken)
+                .rememberMe(status)
                 .tokenType(TokenType.BEARER)
                 .expired(false)
                 .revoked(false)
@@ -138,13 +141,13 @@ public class AuthServiseImpl implements AuthService {
     }
 
     // set expiry date for token
-    private static int getExpirationDay(User user) {
+    private static int getExpirationDay(boolean request) {
         int expirationDay;
-        if (user.isRememberMe())
+        if (request)
         {
-            expirationDay = 1000 * 60 * 60 * 24 * 7; // check Remember Me token Valid 7 Days
+            expirationDay = 1000 * 60 * 60 * 24 * 7; // check Remember Me token Valid 7 Days or when logout
         } else {
-            expirationDay = 1000 * 60 * 60 * 4; // If Not check RememberMe token valid 4 Hour or when logout
+            expirationDay = 1000 * 60 * 60 * 24; // If Not check RememberMe token valid 24 Hour or when logout
         }
         return expirationDay;
     }
