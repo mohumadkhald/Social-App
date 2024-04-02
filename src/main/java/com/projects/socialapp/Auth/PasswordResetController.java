@@ -21,7 +21,7 @@ public class PasswordResetController {
 
 
 
-    @PostMapping("/request")
+    @PostMapping("/send-reset")
     public ResponseEntity<String> requestResetPassword(@RequestParam("email") String email) {
         // Generate a unique token (UUID)
         String resetToken = UUID.randomUUID().toString();

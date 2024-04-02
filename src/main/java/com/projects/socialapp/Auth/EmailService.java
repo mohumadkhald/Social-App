@@ -21,7 +21,14 @@ public class EmailService {
         message.setText("Please click the following link to reset your password: http://localhost:8080/api/auth/reset?token=" + resetToken);
         emailSender.send(message);
         System.out.println("Email sent successfully!");
+    }
 
+    public void sendVerificationEmail(String to, String verificationToken) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject("Verify Your Email");
+        message.setText("Please click the following link to verify your email: http://localhost:8080/api/auth/verify-email?token=" + verificationToken);
+        emailSender.send(message);
     }
 
 }
