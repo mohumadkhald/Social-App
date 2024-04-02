@@ -12,13 +12,16 @@ import com.projects.socialapp.token.Token;
 import com.projects.socialapp.token.TokenRepo;
 import com.projects.socialapp.token.TokenType;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Service
@@ -37,6 +40,7 @@ public class AuthServiseImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenRepo tokenRepo;
+    private EmailService emailService;
     /*
     |--------------------------------------------------------------------------
     | Implement Register
@@ -58,6 +62,8 @@ public class AuthServiseImpl implements AuthService {
                 .accountNonExpired(true) // Set accountNonExpired property
                 .accountNonLocked(true) // Set accountNonLocked property
                 .credentialsNonExpired(true) // Set credentialsNonExpired property
+                .verificationToken(UUID.randomUUID().toString()) // Generate verification token
+                .verificationTokenExpiry(LocalDateTime.now().plusHours(24)) // Set expiry time (1 day)
                 .build();
         if (userRepo.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");
@@ -66,7 +72,23 @@ public class AuthServiseImpl implements AuthService {
         int expirationDay = getExpirationDay(false);
         var jwtToken = jwtService.generateToken(user, expirationDay);
         savedUserToken(savedUser, jwtToken, false);
+        emailService.sendVerificationEmail(savedUser.getEmail(), savedUser.getVerificationToken());
         return AuthResponse.builder().token(jwtToken).message("Register Success Have A Nice Time").build();
+    }
+
+
+    @Override
+    public ResponseEntity<String> resendVerificationEmail(String email) throws Exception {
+        User user = userRepo.findByEmail(email);
+
+        if (user.isEmailVerified()) {
+            throw new Exception("User is already verified");
+        }
+         user.setVerificationToken(UUID.randomUUID().toString()); // Generate verification token
+         user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24)); // Set expiry time (1 day)
+        userRepo.save(user);
+        emailService.sendVerificationEmail(user.getEmail(), user.getVerificationToken());
+        return ResponseEntity.ok("email send success");
     }
 
 
@@ -90,14 +112,16 @@ public class AuthServiseImpl implements AuthService {
             // Retrieve user details
             var user = userRepo.findByEmail(request.getEmail());
 
-
             int expirationDay = getExpirationDay(request.isRemember());
 
             // Generate JWT token
             var jwtToken = jwtService.generateToken(user, expirationDay);
             savedUserToken(user, jwtToken, request.isRemember());
 
-
+            if (!user.isEmailVerified())
+            {
+                return AuthResponse.builder().token(jwtToken).message("Login Success Email " + user.getEmail() + " Not Verify").build();
+            }
             // Return the token along with the user details
             return AuthResponse.builder().token(jwtToken).message("Login Success").build();
         } catch (AuthenticationException e) {
