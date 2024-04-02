@@ -80,6 +80,21 @@ public class UserController {
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | API Routes Edit Data of User
+    |--------------------------------------------------------------------------
+    */
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String jwtToken,@Valid @RequestBody RegisterRequestDto newData)
+    {
+
+        Integer id = userService.findUserIdByJwt(jwtToken);
+        return userService.updateUser(id, newData);
+
+    }
+
+
 
     /*
     |--------------------------------------------------------------------------

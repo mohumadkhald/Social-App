@@ -39,7 +39,7 @@ public class UserMapper {
     public UserResponseDto toUserResponseDto(User user) {
 
         return new UserResponseDto(user.getId(),
-                user.getFirstname(),
+                user.getFirstname() + " " +
                 user.getLastname(),
                 user.getGender(),
                 user.getEmail()

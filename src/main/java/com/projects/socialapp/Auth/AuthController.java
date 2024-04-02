@@ -75,29 +75,6 @@ public class AuthController {
     }
 
 
-//    @PostMapping("/logout")
-//    public ResponseEntity<String> logout(@RequestHeader("Authorization") String jwtToken) {
-//        if (jwtToken != null && jwtToken.startsWith("Bearer ")) {
-//            String token = jwtToken.substring(7); // Extract token from "Bearer TOKEN"
-//
-//            // Retrieve the token from the repository
-//            Token storedToken = tokenRepo.findByToken(token).orElse(null);
-//            if (storedToken != null) {
-//                // Set the token as expired and revoked
-//                storedToken.setExpired(true);
-//                storedToken.setRevoked(true);
-//
-//                // Save the changes back to the repository
-//                tokenRepo.save(storedToken);
-//
-//                return ResponseEntity.ok("Token invalidated successfully.");
-//            } else {
-//                return ResponseEntity.badRequest().body("Token not found.");
-//            }
-//        } else {
-//            return ResponseEntity.badRequest().body("Invalid token format.");
-//        }
-//    }
 
 
 

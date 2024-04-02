@@ -359,7 +359,7 @@ public class UserServiceImpl implements UserService {
 
             // Construct UserProfileDto
             UserProfileDto userProfileDto = UserProfileDto.fromUserResponseDto(
-                    new UserResponseDto(user.getId(), user.getFirstname(), user.getLastname(), user.getGender(), user.getEmail()),
+                    new UserResponseDto(user.getId(), user.getFirstname()+ " " +user.getLastname(), user.getGender(), user.getEmail()),
                     followersCount,
                     followingCount,
                     friendsCount);
@@ -400,7 +400,7 @@ public class UserServiceImpl implements UserService {
             List<UserResponseDto> followerDtos = followers.stream()
                     .map(follower -> new UserResponseDto(
                             follower.getId(),
-                            follower.getFirstname(),
+                            follower.getFirstname()+ " " +
                             follower.getLastname(),
                             follower.getGender()
                             ,follower.getEmail()))
@@ -440,7 +440,7 @@ public class UserServiceImpl implements UserService {
             List<UserResponseDto> followingDtos = following.stream()
                     .map(followingUser -> new UserResponseDto(
                             followingUser.getId(),
-                            followingUser.getFirstname(),
+                            followingUser.getFirstname() + " " +
                             followingUser.getLastname(),
                             followingUser.getGender(),
                             followingUser.getEmail()))
@@ -487,7 +487,7 @@ public class UserServiceImpl implements UserService {
             List<UserResponseDto> friendDtos = friends.stream()
                     .map(friend -> new UserResponseDto(
                             friend.getId(),
-                            friend.getFirstname(),
+                            friend.getFirstname() + " " +
                             friend.getLastname(),
                             friend.getGender(),
                             friend.getEmail()))

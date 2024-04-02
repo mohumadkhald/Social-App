@@ -37,4 +37,5 @@ public interface UserService {
 
     ResponseEntity<?> getUserFriends(Integer userId);
 
+
 }

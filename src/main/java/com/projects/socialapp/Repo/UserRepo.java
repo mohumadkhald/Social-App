@@ -20,4 +20,8 @@ public interface UserRepo extends JpaRepository<User, Integer> {
     boolean findUserByEmail(@NotBlank(message = "Email cannot be empty or start space") @Pattern(regexp = "^(.+)@(.+)$", message = "Email should be valid") String user);
 
     boolean existsByEmail(String email);
+
+
+
+    User findByResetToken(String token);
 }
