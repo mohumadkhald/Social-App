@@ -9,8 +9,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MessageResponseWithUserDto {
     private Integer id;
+    private Integer chatId;
     private String content;
     private String image;
+    private Integer senderId;
     private String sender;
     private String receiver;
     private String time;

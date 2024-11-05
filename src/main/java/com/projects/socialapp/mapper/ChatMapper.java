@@ -62,7 +62,7 @@ public class ChatMapper {
 //            }
             user = userService.findById(user.getId());
             // Assuming ChatRequestDto constructor accepts user IDs
-            ChatUserDto chatUserDto = new ChatUserDto(chat.getId(),chat.getChat_name(), chat.getChat_img(), user.getId(), user.getFirstname(), user.getLastname());
+            ChatUserDto chatUserDto = new ChatUserDto(chat.getId(),chat.getChat_name(), chat.getChat_img(), user.getId(), user.getFirstname() + " " + user.getLastname());
             chatUserDtos.add(chatUserDto);
         }
 

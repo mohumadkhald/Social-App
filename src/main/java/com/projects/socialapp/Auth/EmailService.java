@@ -18,7 +18,7 @@ public class EmailService {
         message.setFrom("Myapp" + " <" + "manager@ex.com" + ">");
         message.setTo(to);
         message.setSubject("Reset Password");
-        message.setText("Please click the following link to reset your password: http://localhost:8080/api/auth/reset?token=" + resetToken);
+        message.setText("Your code is: " + resetToken);
         emailSender.send(message);
         System.out.println("Email sent successfully!");
     }

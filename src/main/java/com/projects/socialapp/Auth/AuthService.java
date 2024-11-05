@@ -9,7 +9,7 @@ public interface AuthService {
     // Method Register User to Website
     AuthResponse register(RegisterRequestDto request);
 
-    ResponseEntity<String> resendVerificationEmail(String email) throws Exception;
+    ResponseEntity<?> resendVerificationEmail(String email) throws Exception;
 
     //Method Log in For Website
     AuthResponse login(LoginRequestDto request) throws Exception;

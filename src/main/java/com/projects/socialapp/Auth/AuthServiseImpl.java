@@ -11,7 +11,9 @@ import com.projects.socialapp.requestDto.RegisterRequestDto;
 import com.projects.socialapp.token.Token;
 import com.projects.socialapp.token.TokenRepo;
 import com.projects.socialapp.token.TokenType;
+import com.projects.socialapp.traits.ApiTrait;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,6 +43,7 @@ public class AuthServiseImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final TokenRepo tokenRepo;
     private EmailService emailService;
+    private final ApiTrait apiTrait;
     /*
     |--------------------------------------------------------------------------
     | Implement Register
@@ -72,13 +75,13 @@ public class AuthServiseImpl implements AuthService {
         int expirationDay = getExpirationDay(false);
         var jwtToken = jwtService.generateToken(user, expirationDay);
         savedUserToken(savedUser, jwtToken, false);
-        emailService.sendVerificationEmail(savedUser.getEmail(), savedUser.getVerificationToken());
+//        emailService.sendVerificationEmail(savedUser.getEmail(), savedUser.getVerificationToken());
         return AuthResponse.builder().token(jwtToken).message("Register Success Have A Nice Time").build();
     }
 
 
     @Override
-    public ResponseEntity<String> resendVerificationEmail(String email) throws Exception {
+    public ResponseEntity<?> resendVerificationEmail(String email) throws Exception {
         User user = userRepo.findByEmail(email);
 
         if (user.isEmailVerified()) {
@@ -88,7 +91,7 @@ public class AuthServiseImpl implements AuthService {
          user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24)); // Set expiry time (1 day)
         userRepo.save(user);
         emailService.sendVerificationEmail(user.getEmail(), user.getVerificationToken());
-        return ResponseEntity.ok("email send success");
+        return  ApiTrait.successMessage("Email Send Success", HttpStatus.ACCEPTED);
     }
 
 

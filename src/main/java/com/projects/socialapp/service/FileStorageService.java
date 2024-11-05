@@ -17,6 +17,7 @@ public class FileStorageService {
 
     private final Path fileStorageLocation;
 
+
     public FileStorageService() {
         this.fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
         try {
@@ -37,14 +38,28 @@ public class FileStorageService {
             Files.createDirectories(folderPath);
         }
 
-        // Get the original file name
+
+// Get the original file name
         String originalFileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
-        // Generate a unique file name
-        String fileName = UUID.randomUUID().toString() + "_" + originalFileName;
+// Extract filename without the timestamp
+        String[] parts = originalFileName.split("\\s+");
+        String fileNameWithoutTimestamp = parts[0]; // Assuming the filename is before the first space
 
-        // Resolve the file path
+// Get the file extension from the original file name
+        String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+
+// Remove the file extension if it's duplicated
+        if (fileNameWithoutTimestamp.endsWith(fileExtension)) {
+            fileNameWithoutTimestamp = fileNameWithoutTimestamp.substring(0, fileNameWithoutTimestamp.length() - fileExtension.length());
+        }
+
+// Generate a unique file name with the original file extension
+        String fileName = UUID.randomUUID().toString() + "_" + fileNameWithoutTimestamp + fileExtension;
+
+// Resolve the file path
         Path filePath = folderPath.resolve(fileName);
+
 
         // Copy the file to the target location
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);

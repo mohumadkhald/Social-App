@@ -23,7 +23,7 @@ public interface UserRepo extends JpaRepository<User, Integer> {
 
 
 
-    User findByResetToken(String token);
+    User findByResetCode(String token);
 
     User findByVerificationToken(String token);
 }

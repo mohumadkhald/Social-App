@@ -37,7 +37,7 @@ public class ApiTrait {
 
     public static ResponseEntity<?> handleUserList(List<UserResponseDto> users, String messageNotFound) {
         if (users.isEmpty()) {
-            return errorMessage(new HashMap<>(), messageNotFound, HttpStatus.NOT_FOUND);
+            return data(users, "No Following", HttpStatus.OK);
         } else {
             return data(users, "The Data Retrieved Success", HttpStatus.OK);
         }

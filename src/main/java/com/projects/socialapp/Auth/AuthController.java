@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.time.LocalDateTime;
 
@@ -82,38 +83,35 @@ public class AuthController {
 
 
 
-    @PostMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token, @RequestHeader ("Authorization") String jwt) throws Exception {
-        int userID = userService.findUserIdByJwt(jwt);
-        User userJwt = userService.findById(userID);
-        // Find user by verification token
-        User user = userRepo.findByVerificationToken(token);
-        if (userJwt == user)
-        {
-            if (user != null && user.getVerificationTokenExpiry().isAfter(LocalDateTime.now())) {
-                // Mark user's email as verified
-                user.setEmailVerified(true);
-                user.setVerificationToken(null);
-                user.setVerificationTokenExpiry(null);
-                userRepo.save(user);
 
-                return ResponseEntity.ok("Email verification successful.");
-            } else {
-                return ResponseEntity.badRequest().body("Invalid or expired token.");
-            }
-        } else {
-            throw new Exception("invalid user");
-        }
+@GetMapping("/verify-email")
+public ModelAndView verifyEmail(@RequestParam("token") String token) {
+    // Find user by verification token
+    User user = userRepo.findByVerificationToken(token);
+    if (user != null && user.getVerificationTokenExpiry().isAfter(LocalDateTime.now())) {
+        // Mark user's email as verified
+        user.setEmailVerified(true);
+        user.setVerificationToken(null);
+        user.setVerificationTokenExpiry(null);
+        userRepo.save(user);
+        // Redirect to http://localhost:3000/
+        return new ModelAndView("redirect:http://localhost:3000/");
+    } else {
+        // Redirect to an error page
+        return new ModelAndView("redirect:/invalid-token");
+    }
+}
 
+    @RequestMapping("/invalid-token")
+    public String invalidToken() {
+        return "Invalid or expired token.";
     }
 
     @PostMapping("resend-verify")
-    public ResponseEntity<String> sendEmailVerify(@RequestHeader ("Authorization") String token) throws Exception {
+    public ResponseEntity<?> sendEmailVerify(@RequestHeader ("Authorization") String token) throws Exception {
         int userID = userService.findUserIdByJwt(token);
         User user = userService.findById(userID);
         return authService.resendVerificationEmail(user.getEmail());
     }
-
-
 
 }

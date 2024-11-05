@@ -179,8 +179,8 @@ public class User extends Base  implements UserDetails {
 
 
     // New fields for password reset
-    private String resetToken;
-    private LocalDateTime resetTokenExpiry;
+    private String resetCode;
+    private LocalDateTime resetCodeExpiry;
     private String verificationToken;
     private LocalDateTime verificationTokenExpiry;
     private boolean emailVerified;

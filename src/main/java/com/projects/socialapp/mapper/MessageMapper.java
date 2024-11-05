@@ -61,7 +61,7 @@ public MessageResponseWithUserDto toMessageDto(Message message) {
         String formattedCreatedAt = createdAtInEgypt.format(formatter);
 
         // Construct the DTO with the sender's firstname
-        return new MessageResponseWithUserDto(message.getId(), message.getContent(), message.getImg(),senderFirstname, reciverUsername, formattedCreatedAt);
+        return new MessageResponseWithUserDto(message.getId(), message.getChat().getId(),message.getContent(), message.getImg(),message.getSender().getId(), senderFirstname, reciverUsername, formattedCreatedAt);
     } else {
         // Handle the case where sender is null
         // You can throw an exception, return a default value, or handle it based on your application's requirements

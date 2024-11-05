@@ -30,7 +30,8 @@ public class Message extends Base {
     private String content;
 
     private String img;
-        // big dat
+
+        // big data
     //    @Lob
     //    @Column(name = "content", columnDefinition = "LONGTEXT")
     //    private String content;

@@ -12,6 +12,5 @@ public class ChatUserDto {
     private String chatName;
     private String img_path;
     private Integer id;
-    private String first_name;
-    private String last_name;
+    private String username;
 }

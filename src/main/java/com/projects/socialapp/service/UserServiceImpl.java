@@ -318,7 +318,7 @@ public class UserServiceImpl implements UserService {
 
            // Return success message
            String action = user1.getFollowings().contains(user2) ? "followed" : "unfollowed";
-           return ApiTrait.successMessage("User " + action + " successfully", HttpStatus.ACCEPTED);
+           return ApiTrait.successMessage(action, HttpStatus.ACCEPTED);
        } else {
            return ApiTrait.errorMessage(null, "User(s) not found", HttpStatus.NOT_FOUND);
        }
@@ -359,7 +359,7 @@ public class UserServiceImpl implements UserService {
 
             // Construct UserProfileDto
             UserProfileDto userProfileDto = UserProfileDto.fromUserResponseDto(
-                    new UserResponseDto(user.getId(), user.getFirstname()+ " " +user.getLastname(), user.getGender(), user.getEmail()),
+                    new UserResponseDto(user.getId(), user.getFirstname()+ " " +user.getLastname(), user.getGender(), user.getEmail(), user.isEmailVerified()),
                     followersCount,
                     followingCount,
                     friendsCount);
@@ -403,7 +403,8 @@ public class UserServiceImpl implements UserService {
                             follower.getFirstname()+ " " +
                             follower.getLastname(),
                             follower.getGender()
-                            ,follower.getEmail()))
+                            ,follower.getEmail(),
+                            user.isEmailVerified()))
                     .collect(Collectors.toList());
 
             // Handle the response using ApiTrait
@@ -443,7 +444,8 @@ public class UserServiceImpl implements UserService {
                             followingUser.getFirstname() + " " +
                             followingUser.getLastname(),
                             followingUser.getGender(),
-                            followingUser.getEmail()))
+                            followingUser.getEmail(),
+                            user.isEmailVerified()))
                     .collect(Collectors.toList());
 
             // Handle the response using ApiTrait
@@ -490,7 +492,8 @@ public class UserServiceImpl implements UserService {
                             friend.getFirstname() + " " +
                             friend.getLastname(),
                             friend.getGender(),
-                            friend.getEmail()))
+                            friend.getEmail(),
+                            friend.isEmailVerified()))
                     .collect(Collectors.toList());
 
             // Handle the response using ApiTrait

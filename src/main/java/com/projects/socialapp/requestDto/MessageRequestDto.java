@@ -13,5 +13,4 @@ public class MessageRequestDto {
     private Integer chatId;
     private String img;
     private String content;
-
 }

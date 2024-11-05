@@ -16,6 +16,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/users")
 @AllArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000/")
 public class UserController {
 
     private final UserRepo userRepo;
@@ -64,7 +65,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<?> findUserById(@PathVariable Integer id)
     {
-        return userService.getUserByIdResponse(id);
+        return userService.getUserProfile(id);
     }
 
 

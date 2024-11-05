@@ -42,7 +42,8 @@ public class UserMapper {
                 user.getFirstname() + " " +
                 user.getLastname(),
                 user.getGender(),
-                user.getEmail()
+                user.getEmail(),
+                user.isEmailVerified()
         );
     }
 }
