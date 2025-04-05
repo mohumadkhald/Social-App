@@ -37,10 +37,6 @@ public class PostController {
         return postService.editPost(postRequestDto, postId, userId);
     }
 
-    @GetMapping("/users/{userId}")
-    public List<PostResponseWithUserDto> getPostsByUserId(@PathVariable Integer userId) {
-        return postService.findPostsByUserId(userId);
-    }
 
     @DeleteMapping("/{postId}")
     public String deletePost(@PathVariable Integer postId, @RequestHeader("Authorization") String jwtToken) throws Exception {

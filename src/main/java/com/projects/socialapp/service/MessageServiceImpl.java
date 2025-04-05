@@ -126,6 +126,25 @@ public class MessageServiceImpl implements MessageService{
         return "All messages sent by user with ID " + userId + " in chat with ID " + chatId + " have been hidden.";
     }
 
+    @Override
+    public MessageResponseWithUserDto findLastMessageByChatId(Integer chatId, Integer userId) throws Exception {
+        var chat = chatService.findChatById(chatId);
+        Integer id1 = chat.get(0).getId();
+        Integer id2 = chat.get(1).getId();
+
+        if (!userId.equals(id1) && !userId.equals(id2)) {
+            throw new IllegalArgumentException("User is not a participant of the chat");
+        }
+
+        Message lastMessage = messageRepo.findTopByChatIdOrderByCreatedAtDesc(chatId);
+
+        if (lastMessage == null) {
+            return null; // No messages in chat
+        }
+
+        return messageMapper.toMessageDto(lastMessage);
+    }
+
     private void deletedByUser(Integer userId, Message message) {
         String deletedByUser = message.getDeletedByUser();
         if (deletedByUser == null || !Arrays.asList(deletedByUser.split(",")).contains(String.valueOf(userId))) {

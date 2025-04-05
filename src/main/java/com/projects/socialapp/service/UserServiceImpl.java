@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
 
     /*
     |--------------------------------------------------------------------------
-    | Inject Of  Class
+    | Inject Of  Service
     |--------------------------------------------------------------------------
     |
     | Here is where you can Inject Class Service and Repository and Another Providers
@@ -37,7 +37,6 @@ public class UserServiceImpl implements UserService {
     private final ApiTrait apiTrait;
     private final JwtService jwtProvider;
     private final PasswordEncoder passwordEncoder;
-
 
     /*|--------------------------------------------------------------------------
             | End of Inject
@@ -51,8 +50,7 @@ public class UserServiceImpl implements UserService {
     |-------------------------------------------------------------------------- */
 
     @Override
-    public Integer findUserIdByJwt(String jwt)
-    {
+    public Integer findUserIdByJwt(String jwt) {
         String email = jwtProvider.getEmailFromToken(jwt);
         User user = userRepo.findByEmail(email);
 
@@ -73,8 +71,6 @@ public class UserServiceImpl implements UserService {
     /*|--------------------------------------------------------------------------
                                     | End Implement
     |-------------------------------------------------------------------------- */
-
-
 
 
     /*
@@ -100,8 +96,6 @@ public class UserServiceImpl implements UserService {
     |-------------------------------------------------------------------------- */
 
 
-
-
     /*
     |--------------------------------------------------------------------------
     | Implement Of Retrieve User
@@ -113,7 +107,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<?> getUserByIdResponse(Integer id) {
         List<UserResponseDto> user = Collections.singletonList(findUserById(id));
-        return ApiTrait.data(user,"The Data For User Retrieved Success", HttpStatus.OK);
+        return ApiTrait.data(user, "The Data For User Retrieved Success", HttpStatus.OK);
 
     }
 
@@ -128,8 +122,6 @@ public class UserServiceImpl implements UserService {
     /*|--------------------------------------------------------------------------
                                     | End Implement
     |-------------------------------------------------------------------------- */
-
-
 
 
     /*
@@ -193,8 +185,6 @@ public class UserServiceImpl implements UserService {
     |-------------------------------------------------------------------------- */
 
 
-
-
     /*
     |--------------------------------------------------------------------------
     | Implement How Can Get All Users
@@ -225,6 +215,37 @@ public class UserServiceImpl implements UserService {
     |-------------------------------------------------------------------------- */
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Implement How Can Get All Users
+    |--------------------------------------------------------------------------
+    |
+    | Here is How you can get all Users Using List And Hash Map After Get Collectors
+    |
+    */
+
+    public ResponseEntity<?> getSuggestedUsers(Integer userId) {
+        List<UserResponseDto> allUsers = findAllUsers();
+
+        // Get followed users
+        User currentUser = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Set<Integer> followedUserIds = currentUser.getFollowings().stream()
+                .map(User::getId)
+                .collect(Collectors.toSet());
+
+        // Filter out followed users
+        List<UserResponseDto> suggestedUsers = allUsers.stream()
+                .filter(user -> !followedUserIds.contains(user.id()) && !user.id().equals(userId))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(suggestedUsers);
+    }
+
+
+    /*|--------------------------------------------------------------------------
+                                       | End Implement
+    |-------------------------------------------------------------------------- */
 
 
     /*
@@ -266,7 +287,7 @@ public class UserServiceImpl implements UserService {
             return ApiTrait.successMessage("User updated successfully", HttpStatus.OK);
         } catch (UserNotFoundException e) {
             // Return error response for user not found
-            throw  new UserNotFoundException("The User Not Found" + id);
+            throw new UserNotFoundException("The User Not Found" + id);
         } catch (EmailAlreadyExistsException e) {
             // Return error response for email already exists
             return ApiTrait.errorMessage(null, e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -281,54 +302,50 @@ public class UserServiceImpl implements UserService {
     |-------------------------------------------------------------------------- */
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Implement Follow or UnFollow
+    |--------------------------------------------------------------------------
+    |
+    | Make Follow from user login to another user you need
+    |
+    */
+    @Override
+    public ResponseEntity<?> toggleFollowUser(Integer userId1, Integer userId2) {
+        User user1 = userRepo.findUserById(userId1);
+        User user2 = userRepo.findUserById(userId2);
 
+        if (Objects.equals(userId1, userId2)) {
+            return ApiTrait.errorMessage(null, "Cannot follow/unfollow yourself", HttpStatus.BAD_REQUEST);
+        } else if (user1 != null && user2 != null) {
+            // If user1 is following user2, unfollow; else follow
+            if (user1.getFollowings().contains(user2)) {
+                // User1 is following user2, so unfollow
+                user1.getFollowings().remove(user2);
+                user2.getFollowers().remove(user1);
+                // Save changes
+                userRepo.save(user1);
+                userRepo.save(user2);
+            } else {
+                // User1 is not following user2, so follow
+                user1.getFollowings().add(user2);
+                user2.getFollowers().add(user1);
+                // Save changes
+                userRepo.save(user1);
+                userRepo.save(user2);
+            }
 
-   /*
-   |--------------------------------------------------------------------------
-   | Implement Follow or UnFollow
-   |--------------------------------------------------------------------------
-   |
-   | Make Follow from user login to another user you need
-   |
-   */
-   @Override
-   public ResponseEntity<?> toggleFollowUser(Integer userId1, Integer userId2) {
-       User user1 = userRepo.findUserById(userId1);
-       User user2 = userRepo.findUserById(userId2);
-
-       if (Objects.equals(userId1, userId2)) {
-           return ApiTrait.errorMessage(null, "Cannot follow/unfollow yourself", HttpStatus.BAD_REQUEST);
-       } else if (user1 != null && user2 != null) {
-           // If user1 is following user2, unfollow; else follow
-           if (user1.getFollowings().contains(user2)) {
-               // User1 is following user2, so unfollow
-               user1.getFollowings().remove(user2);
-               user2.getFollowers().remove(user1);
-               // Save changes
-               userRepo.save(user1);
-               userRepo.save(user2);
-           } else {
-               // User1 is not following user2, so follow
-               user1.getFollowings().add(user2);
-               user2.getFollowers().add(user1);
-               // Save changes
-               userRepo.save(user1);
-               userRepo.save(user2);
-           }
-
-           // Return success message
-           String action = user1.getFollowings().contains(user2) ? "followed" : "unfollowed";
-           return ApiTrait.successMessage(action, HttpStatus.ACCEPTED);
-       } else {
-           return ApiTrait.errorMessage(null, "User(s) not found", HttpStatus.NOT_FOUND);
-       }
-   }
+            // Return success message
+            String action = user1.getFollowings().contains(user2) ? "followed" : "unfollowed";
+            return ApiTrait.successMessage(action, HttpStatus.ACCEPTED);
+        } else {
+            return ApiTrait.errorMessage(null, "User(s) not found", HttpStatus.NOT_FOUND);
+        }
+    }
 
     /*|--------------------------------------------------------------------------
                                     | End Implement
     |-------------------------------------------------------------------------- */
-
-
 
 
     /*
@@ -359,7 +376,7 @@ public class UserServiceImpl implements UserService {
 
             // Construct UserProfileDto
             UserProfileDto userProfileDto = UserProfileDto.fromUserResponseDto(
-                    new UserResponseDto(user.getId(), user.getFirstname()+ " " +user.getLastname(), user.getGender(), user.getEmail(), user.isEmailVerified()),
+                    new UserResponseDto(user.getId(), user.getFirstname() + " " + user.getLastname(), user.getGender(), user.getEmail(), user.isEmailVerified(), user.getRole().toString(), user.isEnabled(), user.isAccountNonLocked()),
                     followersCount,
                     followingCount,
                     friendsCount);
@@ -377,8 +394,6 @@ public class UserServiceImpl implements UserService {
     /*|--------------------------------------------------------------------------
                                         | End Implement
     |-------------------------------------------------------------------------- */
-
-
 
 
     /*
@@ -400,11 +415,11 @@ public class UserServiceImpl implements UserService {
             List<UserResponseDto> followerDtos = followers.stream()
                     .map(follower -> new UserResponseDto(
                             follower.getId(),
-                            follower.getFirstname()+ " " +
-                            follower.getLastname(),
+                            follower.getFirstname() + " " +
+                                    follower.getLastname(),
                             follower.getGender()
-                            ,follower.getEmail(),
-                            user.isEmailVerified()))
+                            , follower.getEmail(),
+                            user.isEmailVerified(), user.getRole().toString(), user.isEnabled(), user.isAccountNonLocked()))
                     .collect(Collectors.toList());
 
             // Handle the response using ApiTrait
@@ -418,8 +433,6 @@ public class UserServiceImpl implements UserService {
     /*|--------------------------------------------------------------------------
                                         | End Implement
     |-------------------------------------------------------------------------- */
-
-
 
 
     /*
@@ -442,10 +455,10 @@ public class UserServiceImpl implements UserService {
                     .map(followingUser -> new UserResponseDto(
                             followingUser.getId(),
                             followingUser.getFirstname() + " " +
-                            followingUser.getLastname(),
+                                    followingUser.getLastname(),
                             followingUser.getGender(),
                             followingUser.getEmail(),
-                            user.isEmailVerified()))
+                            user.isEmailVerified(), user.getRole().toString(), user.isEnabled(), user.isAccountNonLocked()))
                     .collect(Collectors.toList());
 
             // Handle the response using ApiTrait
@@ -490,10 +503,10 @@ public class UserServiceImpl implements UserService {
                     .map(friend -> new UserResponseDto(
                             friend.getId(),
                             friend.getFirstname() + " " +
-                            friend.getLastname(),
+                                    friend.getLastname(),
                             friend.getGender(),
                             friend.getEmail(),
-                            friend.isEmailVerified()))
+                            friend.isEmailVerified(), user.getRole().toString(), user.isEnabled(), user.isAccountNonLocked()))
                     .collect(Collectors.toList());
 
             // Handle the response using ApiTrait
@@ -510,22 +523,17 @@ public class UserServiceImpl implements UserService {
     |-------------------------------------------------------------------------- */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
 

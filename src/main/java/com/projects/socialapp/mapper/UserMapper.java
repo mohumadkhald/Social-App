@@ -43,7 +43,8 @@ public class UserMapper {
                 user.getLastname(),
                 user.getGender(),
                 user.getEmail(),
-                user.isEmailVerified()
+                user.isEmailVerified(),
+                user.getRole().toString(), user.isEnabled(), user.isAccountNonLocked()
         );
     }
 }

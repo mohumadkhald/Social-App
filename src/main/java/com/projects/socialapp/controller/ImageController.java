@@ -49,7 +49,7 @@ public class ImageController {
     @GetMapping("/public/images/{userId}/images/{imageName:.+}")
     public ResponseEntity<byte[]> getImage(@PathVariable String imageName, @PathVariable Integer userId) throws IOException {
         // Define the directory where the images are stored
-        String directory = "/home/mohumadkhald/Public/social/SocialApp/uploads/"+userId+"/messages";
+        String directory = "/home/mohumadkhald/Public/SocialApp/uploads/"+userId+"/messages";
 
         // Construct the full path to the image
         String imagePath = directory + "/" + imageName;

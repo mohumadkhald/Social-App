@@ -4,6 +4,7 @@ import com.projects.socialapp.Repo.UserRepo;
 import com.projects.socialapp.model.User;
 import com.projects.socialapp.requestDto.LoginRequestDto;
 import com.projects.socialapp.requestDto.RegisterRequestDto;
+import com.projects.socialapp.service.AuthService;
 import com.projects.socialapp.service.UserService;
 import com.projects.socialapp.token.TokenRepo;
 import jakarta.validation.Valid;

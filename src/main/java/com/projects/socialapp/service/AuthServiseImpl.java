@@ -1,5 +1,7 @@
-package com.projects.socialapp.Auth;
+package com.projects.socialapp.service;
 
+import com.projects.socialapp.Auth.AuthResponse;
+import com.projects.socialapp.Auth.EmailService;
 import com.projects.socialapp.Config.JwtService;
 import com.projects.socialapp.Repo.UserRepo;
 import com.projects.socialapp.expection.AuthenticationnException;

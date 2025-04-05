@@ -38,4 +38,5 @@ public interface UserService {
     ResponseEntity<?> getUserFriends(Integer userId);
 
 
+    ResponseEntity<?> getSuggestedUsers(Integer userId);
 }

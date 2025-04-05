@@ -1,5 +1,6 @@
-package com.projects.socialapp.Auth;
+package com.projects.socialapp.service;
 
+import com.projects.socialapp.Auth.AuthResponse;
 import com.projects.socialapp.requestDto.LoginRequestDto;
 import com.projects.socialapp.requestDto.RegisterRequestDto;
 import org.springframework.http.ResponseEntity;

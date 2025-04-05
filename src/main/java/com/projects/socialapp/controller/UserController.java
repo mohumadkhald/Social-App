@@ -1,9 +1,12 @@
 package com.projects.socialapp.controller;
 
 import com.projects.socialapp.Repo.UserRepo;
+import com.projects.socialapp.aspect.AdminOnly;
 import com.projects.socialapp.model.User;
 import com.projects.socialapp.requestDto.RegisterRequestDto;
+import com.projects.socialapp.responseDto.PostResponseWithUserDto;
 import com.projects.socialapp.responseDto.UserResponseDto;
+import com.projects.socialapp.service.PostService;
 import com.projects.socialapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -11,6 +14,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -21,6 +25,7 @@ public class UserController {
 
     private final UserRepo userRepo;
     private final UserService userService;
+    private final PostService postService;
 
 
 
@@ -136,6 +141,7 @@ public class UserController {
     | API Routes Get AllUser
     |--------------------------------------------------------------------------
     */
+    @AdminOnly
     @GetMapping
     public ResponseEntity<?> getUsers()
     {
@@ -143,6 +149,10 @@ public class UserController {
     }
 
 
+    @GetMapping("/suggestions")
+    public ResponseEntity<?> getSuggestedUsers(@RequestParam Integer userId) {
+        return userService.getSuggestedUsers(userId);
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -219,6 +229,16 @@ public class UserController {
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | API Routes Number of Posts for user
+    |--------------------------------------------------------------------------
+    */
+    @GetMapping("/posts")
+    public List<PostResponseWithUserDto> getPostsByUserId(@RequestHeader("Authorization") String jwtToken) {
+        Integer id = userService.findUserIdByJwt(jwtToken);
+        return postService.findPostsByUserId(id);
+    }
 
 
 }

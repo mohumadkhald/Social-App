@@ -74,6 +74,17 @@ public class MessageController {
         Integer userId = userService.findUserIdByJwt(jwtToken);
         return messageService.findAllMessagesByChatId(chatId, userId);
     }
+
+    @GetMapping("/{chatId}/last")
+    public MessageResponseWithUserDto getLastMessage(
+            @PathVariable Integer chatId,
+            @RequestHeader("Authorization") String jwtToken) throws Exception {
+
+        Integer userId = userService.findUserIdByJwt(jwtToken);
+        return messageService.findLastMessageByChatId(chatId, userId);
+
+    }
+
 }
 
 

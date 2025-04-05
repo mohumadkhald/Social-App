@@ -14,5 +14,8 @@ public interface MessageService {
 
     String deleteAllMessageByChatId(Integer userId, Integer chatId) throws Exception;
 
+    MessageResponseWithUserDto findLastMessageByChatId(Integer chatId, Integer userId) throws Exception;
+
+
 //    MessageResponseWithUserDto findMessageByMessageId(Integer messageId);
 }

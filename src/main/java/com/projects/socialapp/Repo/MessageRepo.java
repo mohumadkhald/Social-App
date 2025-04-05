@@ -12,4 +12,6 @@ public interface MessageRepo extends JpaRepository<Message, Integer> {
     List<Message> findAllByChatId(Integer chatId);
 
     void deleteByChatId(Integer chatId);
+
+    Message findTopByChatIdOrderByCreatedAtDesc(Integer chatId);
 }
